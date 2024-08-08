@@ -10,9 +10,9 @@ public class ShotExplosion : MonoBehaviour
         Collider[] enemiesToKill = Physics.OverlapSphere(transform.position, explRadius);
         foreach (Collider enemy in enemiesToKill)
         {
-            if (enemy.CompareTag("Target"))
+            if (enemy.GetComponent<EnemySoldier>() != null)
             {
-                Destroy(enemy.gameObject);
+                enemy.GetComponent<EnemySoldier>().Die();
             }
         }
     }
