@@ -9,6 +9,7 @@ public class TankShoot : MonoBehaviour
     public float velocity;
     public float fireRate;
     float nextFireTime;
+    public int ammo;
     //public Animator gunAnim;
     //public GameObject cnnShotTrail;
 
@@ -24,26 +25,34 @@ public class TankShoot : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        //ViewChanger.Instance.ShakeCurrentCam(10, 5, 0, 1);
-        //gunAnim.SetTrigger("Shoot");
-        float waitTime;
-        if (muzzleFlash != null)
+        if (ammo > 0)
         {
-            GameObject mf = Instantiate(muzzleFlash, transform.position, transform.rotation);
-            //Destroy(mf, 2);
-        }        
-        RaycastHit hit;
-        Debug.DrawRay(transform.position, transform.forward * 500, Color.white, 1f);
-        if (Physics.Raycast(transform.position, transform.forward, out hit))
+            //ViewChanger.Instance.ShakeCurrentCam(10, 5, 0, 1);
+            //gunAnim.SetTrigger("Shoot");
+            float waitTime;
+            if (muzzleFlash != null)
+            {
+                GameObject mf = Instantiate(muzzleFlash, transform.position, transform.rotation);
+                //Destroy(mf, 2);
+            }
+            RaycastHit hit;
+            Debug.DrawRay(transform.position, transform.forward * 500, Color.white, 1f);
+            if (Physics.Raycast(transform.position, transform.forward, out hit))
+            {
+                waitTime = Vector3.Distance(transform.position, hit.point) / velocity;
+                /*CnnShotTrail trail = Instantiate(cnnShotTrail, transform.position, Quaternion.identity).GetComponent<CnnShotTrail>();
+                trail.transform.LookAt(hit.point);
+                trail.speed = velocity;
+                Destroy(trail, 2);*/
+                yield return new WaitForSeconds(waitTime);
+                GameObject explsn = Instantiate(explosion, hit.point, new Quaternion(hit.transform.rotation.x, transform.rotation.y, hit.transform.rotation.z, hit.transform.rotation.w));
+                Destroy(explsn, 0.5f);
+            }
+            ammo--;
+        }
+        else
         {
-            waitTime = Vector3.Distance(transform.position, hit.point) / velocity;
-            /*CnnShotTrail trail = Instantiate(cnnShotTrail, transform.position, Quaternion.identity).GetComponent<CnnShotTrail>();
-            trail.transform.LookAt(hit.point);
-            trail.speed = velocity;
-            Destroy(trail, 2);*/
-            yield return new WaitForSeconds(waitTime);
-            GameObject explsn = Instantiate(explosion, hit.point, new Quaternion(hit.transform.rotation.x, transform.rotation.y, hit.transform.rotation.z, hit.transform.rotation.w));
-            Destroy(explsn, 0.5f);
+            print("no ammo!!");
         }
     }
 }

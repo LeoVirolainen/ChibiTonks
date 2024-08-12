@@ -47,17 +47,19 @@ public class EnemySoldier : MonoBehaviour
     void Update()
     {
         // Calculate morale
-        if (Vector3.Distance(transform.position, FindObjectOfType<TankMove>().transform.position) < 20)
+        //if tank is closer than 20 units, lose morale
+        float tankDist = Vector3.Distance(transform.position, FindObjectOfType<TankMove>().transform.position);
+        if (tankDist < 20)
         {
-            morale -= Time.deltaTime * 2;
+            morale -= Time.deltaTime * (20 - tankDist); //morale loss quickens as tank closes in
         }
-        else
+        else //if tank is not close, gain morale
         {
-            morale += Time.deltaTime;
+            morale += Time.deltaTime * 10;
         }
         moraleTxt.text = "Morale: " + morale.ToString();
 
-        // Check morale and handle running mode
+        // if morale is less than running limit, run and look for cover
         if (morale < moraleThreshold)
         {
             isRunning = true;
@@ -72,13 +74,13 @@ public class EnemySoldier : MonoBehaviour
 
             currentTarget = GetClosestTarget(TargetType.Cover);
         }
-        else
+        else //if we have enough morale, stop running
         {
             isRunning = false;
 
             agent.speed = 3.5f;
 
-            // If we have ammo and morale, find a player for target
+            // If we have ammo, find a player for target
             if (playerObjects.Count > 0)
             {
                 currentTarget = GetClosestTarget(TargetType.Player);

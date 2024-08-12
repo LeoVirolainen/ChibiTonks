@@ -148,10 +148,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eb4b9516ac68b542bb7b915b444f5c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fuseTime: 5
+  fuseTime: 3
   targetTag: Player
   explosionFx: {fileID: 8839018568036577836, guid: 381dc2471dc6d644c94546fe62b051e2,
     type: 3}
+  damageToDeal: 2
 --- !u!1 &4723650687791252594
 GameObject:
   m_ObjectHideFlags: 0

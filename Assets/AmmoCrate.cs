@@ -5,6 +5,7 @@ using UnityEngine;
 public class AmmoCrate : MonoBehaviour
 {
     float initialY;
+    int ammoAmount = 20;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,16 +24,18 @@ public class AmmoCrate : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            //give player ammo
-            Destroy(gameObject);
+            other.gameObject.GetComponentInChildren<TankShoot>().ammo += ammoAmount;
+            ammoAmount = 0;
         }
         else if (other.CompareTag("Target"))
         {
             if (other.GetComponent<ArmorDestroyer>() != null)
             {
                 other.GetComponent<ArmorDestroyer>().ammo += 3;
-                Destroy(gameObject);
+                ammoAmount -= 3;
             }
         }
+        if (ammoAmount <= 0)
+            Destroy(gameObject);
     }
 }

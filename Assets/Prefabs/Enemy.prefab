@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3062728774801426953}
   - component: {fileID: 8264817877621369908}
   - component: {fileID: 953166600938928149}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 1574748123165922871}
   - component: {fileID: 6383104704045190932}
   - component: {fileID: 13506580026914613}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Helmet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -221,7 +221,7 @@ GameObject:
   - component: {fileID: 7554989553107444575}
   - component: {fileID: 688851344701927149}
   - component: {fileID: 6178983095130432223}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -271,7 +271,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c1b45355bf0c6d643bad966541acfdaa, type: 2}
+  - {fileID: 2100000, guid: cadd0059b7d70864e8922cbc9b3058a6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -306,7 +306,7 @@ GameObject:
   - component: {fileID: 223625523500239721}
   - component: {fileID: 8461310024865694592}
   - component: {fileID: 9095629835018250681}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -420,7 +420,7 @@ GameObject:
   - component: {fileID: 7467956202018788270}
   - component: {fileID: 7818609772354812953}
   - component: {fileID: 4456269059793281326}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Morale
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -543,6 +543,61 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &8206825690902035498
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3434045681683418216}
+  - component: {fileID: 1000309574786350999}
+  m_Layer: 0
+  m_Name: Trigger
+  m_TagString: Target
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3434045681683418216
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8206825690902035498}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7107188372801572341}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &1000309574786350999
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8206825690902035498}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1.9818071
+  m_Direction: 1
+  m_Center: {x: 0, y: -0.016330183, z: 0}
 --- !u!1 &8998127959491954656
 GameObject:
   m_ObjectHideFlags: 0
@@ -557,7 +612,7 @@ GameObject:
   - component: {fileID: 5155733472536306599}
   - component: {fileID: 547704684447849611}
   - component: {fileID: 5993602835514987295}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Enemy
   m_TagString: Target
   m_Icon: {fileID: 0}
@@ -581,6 +636,7 @@ Transform:
   - {fileID: 2248031215187884289}
   - {fileID: 4498910523221904141}
   - {fileID: 9029880694601778155}
+  - {fileID: 3434045681683418216}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &7669444584926094813
@@ -648,10 +704,7 @@ MonoBehaviour:
   playerObjects: []
   ammoBoxes: []
   coverObjects: []
-  moveSpeed: 5
   stoppingDistance: 20
-  groundCheckDistance: 1
-  targetDistFromGround: 1
   currentTarget: {fileID: 0}
   morale: 80
   moraleThreshold: 40

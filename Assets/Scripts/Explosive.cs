@@ -8,6 +8,7 @@ public class Explosive : MonoBehaviour
     float timeToBlow;
     public string targetTag = "Player";
     public GameObject explosionFx;
+    public int damageToDeal;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,7 +28,14 @@ public class Explosive : MonoBehaviour
     {
         if (other.CompareTag(targetTag)) {
             Explode();
-            print("OUCH!");
+            other.GetComponent<TankHealth>().TakeDamage(damageToDeal);
+        }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            Explode();
         }
     }
 
