@@ -5,7 +5,8 @@ using UnityEngine;
 public class MapControl : MonoBehaviour
 {
     public GameObject map;
-    private bool mapActive;
+    public bool mapActive;
+    public int activeRoom;
     // Start is called before the first frame update
     void Start()
     {

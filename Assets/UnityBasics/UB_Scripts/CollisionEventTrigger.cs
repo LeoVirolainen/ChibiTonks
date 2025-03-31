@@ -6,9 +6,9 @@ using UnityEngine.Events;
 public class CollisionEventTrigger : MonoBehaviour {
     public UnityEvent myEvent;
     public bool playerOnly;
-    private void OnCollisionEnter(Collision collision) {
+    private void OnTriggerEnter(Collider other) {
         if (playerOnly == true) {
-            if (collision.gameObject.GetComponentInChildren<Camera>() != null) {
+            if (other.gameObject.GetComponentInChildren<Camera>() != null) {
                 myEvent.Invoke();
                 return;
             }
