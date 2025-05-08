@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcc93d01e203e0140824913d53622318, type: 3}
   m_Name: BSimC_London
   m_EditorClassIdentifier: 
-  cityName: 
+  cityName: London
   position: {x: -14, y: 11, z: 0}
   owner: 2
   baseStrength: 87

@@ -175,10 +175,10 @@ public class BSim_TileManager : MonoBehaviour
             {
                 Vector3Int chosenTarget = potentialTargets[Random.Range(0, potentialTargets.Count)];
 
-                float myPower = tile.strength + Random.Range(0f, 8f);
+                float myPower = tile.strength * Random.Range(0, 4);
                 float enemyPower = tileDict[chosenTarget].strength;
 
-                if (myPower > enemyPower)
+                if (myPower > enemyPower * 1.2f) // Increase the multiplier to make attacks more likely to succeed
                     conversions.Add((tile.position, chosenTarget));
             }
         }
@@ -196,7 +196,7 @@ public class BSim_TileManager : MonoBehaviour
             if (cityPositions.ContainsKey(targetPos))
             {
                 cityPositions[targetPos] = (attackerOwner, 5f); // Take over the city
-                tileDict[targetPos].strength = Random.Range(1f, 3f); // spice it up
+                tileDict[targetPos].strength = Random.Range(1f, 3f); // weaken captured city
 
                 // Update visual tile on map
                 tilemap.SetTile(targetPos, attackerOwner == Owner.North ? northCityTile : southCityTile);

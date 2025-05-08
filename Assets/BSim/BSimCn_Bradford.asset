@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcc93d01e203e0140824913d53622318, type: 3}
   m_Name: BSimCn_Bradford
   m_EditorClassIdentifier: 
-  cityName: 
+  cityName: Bradford
   position: {x: 8, y: 0, z: 0}
   owner: 1
   baseStrength: 3
