@@ -138,77 +138,52 @@ public class BSim_TileManager : MonoBehaviour
     }
     public void SimulateTurn()
     {
-        Dictionary<Vector3Int, float> tileBonusStrength = new();
         List<(Vector3Int attacker, Vector3Int target)> conversions = new();
 
-        // === 1. Calculate tile bonus from cities ===
-        foreach (var city in cityPositions)
-        {
-            Vector3Int cityPos = city.Key;
-            Owner cityOwner = city.Value.owner;
-            float cityStrength = city.Value.strength;
-
-            for (int dx = -3; dx <= 3; dx++)
-            {
-                for (int dy = Mathf.Max(-3, -dx - 3); dy <= Mathf.Min(3, -dx + 3); dy++)
-                {
-                    int dz = -dx - dy;
-                    Vector3Int offset = new Vector3Int(dx, dy, dz);
-                    Vector3Int pos = cityPos + offset;
-
-                    if (!tileDict.ContainsKey(pos)) continue;
-                    if (tileDict[pos].owner != cityOwner) continue;
-
-                    int dist = GetHexDistance(cityPos, pos);
-                    if (dist > 3) continue;
-
-                    float bonus = Mathf.Max(0, cityStrength - dist);
-                    if (!tileBonusStrength.ContainsKey(pos))
-                        tileBonusStrength[pos] = 0;
-                    tileBonusStrength[pos] += bonus;
-                }
-            }
-        }
-
-        // === 2. Tile combat with bonuses ===
         foreach (var kvp in tileDict)
         {
             var tile = kvp.Value;
-            if (tile.owner == Owner.Neutral) continue;
 
-            // Check if surrounded — skip attacking if surrounded by 5+ enemies
-            int enemyCount = 0;
-            var neighbors = GetHexNeighbors(tile.position);
-            foreach (var neighbor in neighbors)
+            if (tile.owner == Owner.Neutral)
+                continue;
+
+            // Check for overwhelming enemy presence
+            int enemyNeighborCount = 0;
+            foreach (var neighbor in GetHexNeighbors(tile.position))
             {
                 if (!tileDict.ContainsKey(neighbor)) continue;
-                if (tileDict[neighbor].owner != tile.owner && tileDict[neighbor].owner != Owner.Neutral)
-                    enemyCount++;
+                var neighborTile = tileDict[neighbor];
+                if (neighborTile.owner != tile.owner && neighborTile.owner != Owner.Neutral)
+                    enemyNeighborCount++;
             }
-            if (enemyCount >= 5) continue;
 
-            // Choose one random enemy tile to attack
-            var enemyNeighbors = neighbors.Where(n =>
-                tileDict.ContainsKey(n) &&
-                tileDict[n].owner != tile.owner &&
-                tileDict[n].owner != Owner.Neutral
-            ).ToList();
+            if (enemyNeighborCount >= 5)
+                continue;
 
-            if (enemyNeighbors.Count == 0) continue;
+            // Gather valid attack targets
+            var potentialTargets = new List<Vector3Int>();
+            foreach (var neighbor in GetHexNeighbors(tile.position))
+            {
+                if (!tileDict.ContainsKey(neighbor)) continue;
+                var neighborTile = tileDict[neighbor];
+                if (neighborTile.owner != tile.owner)
+                    potentialTargets.Add(neighbor);
+            }
 
-            var target = enemyNeighbors[Random.Range(0, enemyNeighbors.Count)];
+            // Choose one random target and attempt attack
+            if (potentialTargets.Count > 0)
+            {
+                Vector3Int chosenTarget = potentialTargets[Random.Range(0, potentialTargets.Count)];
 
-            float basePower = tile.strength + Random.Range(0f, 2f);
-            float bonus = tileBonusStrength.ContainsKey(tile.position) ? tileBonusStrength[tile.position] : 0f;
-            float myPower = basePower + bonus;
+                float myPower = tile.strength + Random.Range(0f, 8f);
+                float enemyPower = tileDict[chosenTarget].strength;
 
-            float enemyPower = tileDict[target].strength + Random.Range(0f, 1f);
-
-            if (myPower > enemyPower)
-                conversions.Add((tile.position, target));
+                if (myPower > enemyPower)
+                    conversions.Add((tile.position, chosenTarget));
+            }
         }
 
-        // === 3. Apply conversions and visuals ===
+        // Apply conversions
         foreach (var conversion in conversions)
         {
             var attackerOwner = tileDict[conversion.attacker].owner;
@@ -217,50 +192,20 @@ public class BSim_TileManager : MonoBehaviour
             tileDict[targetPos].owner = attackerOwner;
             tileDict[targetPos].strength = 1f;
 
+            // Check if target was a city
             if (cityPositions.ContainsKey(targetPos))
             {
-                cityPositions[targetPos] = (attackerOwner, 3f); // Optional: cities lose strength on conquest
-                tileDict[targetPos].strength = 3f;
+                cityPositions[targetPos] = (attackerOwner, 5f); // Take over the city
+                tileDict[targetPos].strength = Random.Range(1f, 3f); // spice it up
 
+                // Update visual tile on map
                 tilemap.SetTile(targetPos, attackerOwner == Owner.North ? northCityTile : southCityTile);
             }
             else
             {
+                // Update normal tile visual
                 tilemap.SetTile(targetPos, attackerOwner == Owner.North ? northTile : southTile);
             }
         }
-
-        // === 4. Apply tinting to contested tiles ===
-        foreach (var kvp in tileDict)
-        {
-            var tile = kvp.Value;
-            var neighbors = GetHexNeighbors(tile.position);
-
-            bool isContested = neighbors.Any(n =>
-                tileDict.ContainsKey(n) &&
-                tileDict[n].owner != tile.owner &&
-                tileDict[n].owner != Owner.Neutral
-            );
-
-            if (isContested)
-            {
-                float bonus = tileBonusStrength.ContainsKey(tile.position) ? tileBonusStrength[tile.position] : 0f;
-                float tintIntensity = Mathf.Clamp01(bonus / 5f); // normalize for visual brightness
-
-                // Example coloring: red for South, blue for North, intensity based on bonus
-                Color color = Color.white;
-                if (tile.owner == Owner.North)
-                    color = Color.Lerp(Color.white, Color.cyan, tintIntensity);
-                else if (tile.owner == Owner.South)
-                    color = Color.Lerp(Color.white, Color.red, tintIntensity);
-
-                tilemap.SetColor(tile.position, color);
-            }
-            else
-            {
-                tilemap.SetColor(tile.position, Color.white); // Reset color
-            }
-        }
     }
-
 }
