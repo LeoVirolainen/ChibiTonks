@@ -55,8 +55,6 @@ public class BSim_TileManager : MonoBehaviour
 
     // Manually mark cities here, or in a separate setup method
     SetCityOwner(new Vector3Int(-4, 0, 0), Owner.North); //Birmingham
-    SetCityOwner(new Vector3Int(-5, 0, 0), Owner.North);
-    SetCityOwner(new Vector3Int(-5, -1, 0), Owner.North);
 
     SetCityOwner(new Vector3Int(5, -2, 0), Owner.North); //manchester
     SetCityOwner(new Vector3Int(8, 2, 0), Owner.North); //leeds
@@ -68,13 +66,7 @@ public class BSim_TileManager : MonoBehaviour
     SetCityOwner(new Vector3Int(0, 4, 0), Owner.North); //nottingham
     SetCityOwner(new Vector3Int(18, 2, 0), Owner.North); //newcastle-upon-tyne
 
-    SetCityOwner(new Vector3Int(-13, 10, 0), Owner.South); //London
-    SetCityOwner(new Vector3Int(-14, 10, 0), Owner.South);
-    SetCityOwner(new Vector3Int(-13, 11, 0), Owner.South);
-    SetCityOwner(new Vector3Int(-14, 11, 0), Owner.South); //centre
-    SetCityOwner(new Vector3Int(-15, 11, 0), Owner.South);
-    SetCityOwner(new Vector3Int(-13, 12, 0), Owner.South);
-    SetCityOwner(new Vector3Int(-14, 12, 0), Owner.South);
+    SetCityOwner(new Vector3Int(-14, 11, 0), Owner.South); //London
 
     SetCityOwner(new Vector3Int(-14, -5, 0), Owner.South); //bristol
     SetCityOwner(new Vector3Int(-4, 5, 0), Owner.South); //leicester

@@ -24,6 +24,8 @@ public class BSim_HexMove : MonoBehaviour
 
     public Tilemap tilemap;
 
+    public TileBase northTile;
+    public TileBase southTile;
     public void MoveInDirection(int directionIndex)
     {
         // Clamp directionIndex between 0-5
@@ -53,21 +55,28 @@ public class BSim_HexMove : MonoBehaviour
         Debug.Log($"Tile under me: {tile}");
     }
 
-    //WIP Switch-Case to convert tiles:
-    /*
-    switch (owner)
+    public void ConvertTile()
     {
-        case Owner.North:
-            tilemap.SetTile(position, northTile);
-            break;
-        case Owner.South:
-            tilemap.SetTile(position, southTile);
-            break;
-        case Owner.Neutral:
-        default:
-            tilemap.SetTile(position, neutralTile);
-            break;
+        Vector3 worldPosition = transform.position;
+        Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
+        TileBase tile = tilemap.GetTile(cellPosition);
+        if (tile == southTile)
+            SwapTile(cellPosition, Owner.South);
+        else
+            SwapTile(cellPosition, Owner.North);
     }
-     */
+
+    public void SwapTile(Vector3Int position, Owner owner)
+    {
+        switch (owner)
+        {
+            case Owner.North:
+                tilemap.SetTile(position, southTile);
+                break;
+            case Owner.South:
+                tilemap.SetTile(position, northTile);
+                break;
+        }
+    }
 }
 
