@@ -7,7 +7,9 @@ public class BSim_HexPathfind : MonoBehaviour
 {
     public Vector3Int goal;
     public Tilemap tilemap;
+    public int maxPathLength = 50;
     private bool goalReached = false;
+    
     // DUMBASS BOGO PATHFINDING!!!!
     // x is the amount of paths we generate
     // y is the cost of a path
@@ -28,31 +30,98 @@ public class BSim_HexPathfind : MonoBehaviour
     6. Do this process multiple times (e.g., 100 tries).
     7. Keep the path that reaches the goal and has the lowest cost or shortest length.
      */
+    public void PrintBestPath()
+    {
+        List<Vector3Int> randPath = GetBestPath(100); //run GetBestPath with 100 paths        
 
-    //returns a random-generated path to goal - path is a (dictionary?) that has a list of chosen hexes and total cost of path
+        Debug.Log("Best path steps:");
+        for (int i = 0; i < randPath.Count; i++)
+        {
+            Vector3Int step = randPath[i];
+            Debug.Log("Step " + i + ": (" + step.x + ", " + step.y + ", " + step.z + ")");
+        }
+    }
+    
+    //Generate (pathsAmt) paths, give them a score & choose the cheapest one
+    public List<Vector3Int> GetBestPath(int pathsAmt)
+    {
+        List<List<Vector3Int>> generatedPaths = new List<List<Vector3Int>>();
+
+        //generate (pathsAmt) paths
+        for (int i = 0; i < pathsAmt; i++) 
+        {
+            //use getRandomPath to get a new rand path
+            List<Vector3Int> newPath = GetRandomPath();
+
+            //add newly generated rand path to list of all new paths
+            generatedPaths.Add(newPath);
+        }
+
+        //make new modifier for containing the best path
+        List<Vector3Int> bestPath = null;
+
+        //set an astronomical sum to this int so we always find a shorter path
+        int lowestCost = int.MaxValue; 
+
+        //go through paths and find shortest one
+        foreach (List<Vector3Int> path in generatedPaths)
+        {
+            int pathCost = path.Count;
+            Debug.Log("This path costs: " + path.Count);
+
+            if (pathCost < lowestCost)
+            {
+                lowestCost = pathCost;
+                bestPath = path;
+            }
+        }
+
+        Debug.Log("Lowest cost was: " + lowestCost);
+        print("Generated a path with " + bestPath.Count + " steps.");
+
+        return bestPath;
+    }
+    //returns a random-generated path to goal
     public List<Vector3Int> GetRandomPath()
     {
         goalReached = false;
-        List<Vector3Int> path = new List<Vector3Int>();
+        List<Vector3Int> path = new List<Vector3Int>();        
 
-        //convert 2D tile pos to 3D
+        //count steps to prevent paths longer than max length
+        int steps = 0;
+
+        //convert current 2D tile pos to 3D
         Vector2Int tilePos2D = GetComponent<BSim_HexMove>().currentHexPosition;
         Vector3Int tilePos3D = new Vector3Int(tilePos2D.x, tilePos2D.y, 0);
 
-        //find my neighbors
-        List<Vector3Int> neighbors = GetValidNeighbors(tilePos3D);
+        //add start tile to path
+        path.Add(tilePos3D);
 
-        //narrow down to best 3 neighbors
-        List<Vector3Int> best3Neighbors = GetBestNeighbours(neighbors);
+        while (!goalReached && steps < maxPathLength)
+        {
+            //find my neighbors
+            List<Vector3Int> neighbors = GetValidNeighbors(tilePos3D);
 
-        // randomly choose one of 3 best options - closest tile gets 60% chance, 2nd 30%, 3rd 10%
-        // IF one of these is the goal, it will return it
-        Vector3Int nextTile = GetWeightedRandomTile(best3Neighbors);
+            if (neighbors.Count == 0)
+            {
+                Debug.LogWarning("No neighbors found, breaking out of loop.");
+                break; // avoid infinite loop if stuck
+            }
 
-        path.Add(nextTile);
+            //narrow down to best 3 neighbors
+            List<Vector3Int> best3Neighbors = GetBestNeighbours(neighbors);
 
-        if (goalReached)
-            return path;
+            // randomly choose one of 3 best options - closest tile gets 60% chance, 2nd 30%, 3rd 10%
+            // IF one of these is the goal, it will return it
+            Vector3Int nextTile = GetWeightedRandomTile(best3Neighbors);
+
+            path.Add(nextTile);
+
+            tilePos3D = nextTile;
+
+            steps++;
+        }
+        return path;
     }
 
     // Call this to get all valid neighbors of a flat-top hex tile
@@ -109,8 +178,9 @@ public class BSim_HexPathfind : MonoBehaviour
 
             if (neighborPos == goal)
             {
-                // stop doing this, other functions will see this is goal and choose it
-                return null;
+                // found goal!
+                goalReached = true;
+                validNeighbors.Add(neighborPos);
             }
             if (tileAtNeighbor != null)
             {
@@ -123,59 +193,78 @@ public class BSim_HexPathfind : MonoBehaviour
         return validNeighbors;
     }
 
+    // Call this to narrow a list of neighbour hexes down to 3 best (closest)
     public List<Vector3Int> GetBestNeighbours(List<Vector3Int> neighborList)
     {
-        //calculate hex dist to goal for each neighbor
-            //hex dist calculation (might want another separate function for this)
-        //pick 3 tiles with shortest dist to goal:
-            // Sorts the list from smallest to biggest
-            //numbers.Sort();
+        //calculate hex dist to goal for each neighbor, then sort neighborList so that closest hex is at index 0, next closest 1, etc.
+        neighborList.Sort(CompareNeighbors);        
 
-            // Get the first 3 (smallest) numbers
-            //List<int> threeLowest = numbers.GetRange(0, 3);
+        //return the three closest hexes by trimming the list to the first 3 (or fewer if there aren't 3).
+        return neighborList.GetRange(0, Mathf.Min(3, neighborList.Count));
 
-            // Now 'threeLowest' contains the lowest three numbers
-            // Sort them again to ensure correct order for random picking?
-        //return threeLowest
     }
 
+    // Call this to quasi-randomly pick one of the 3 best tiles
     public Vector3Int GetWeightedRandomTile(List<Vector3Int> tilesToChooseFrom)
-    {
+    {        
         // roll a number between 0 and 99
         int roll = UnityEngine.Random.Range(0, 100); // 0 to 99
 
         Vector3Int selectedTile;
 
+        // fallback: less than 3 tiles, pick randomly from what's available
+        if (tilesToChooseFrom.Count < 3)
+        {            
+            int rInt = Random.Range(0, tilesToChooseFrom.Count);
+            selectedTile = tilesToChooseFrom[rInt];
+        }
+
         if (roll < 60)
         {
             // 60% chance
             selectedTile = tilesToChooseFrom[0];
-            if (selectedTile == goal)
-            {
-                goalReached = true;
-                return selectedTile; 
-            }
         }
         else if (roll < 90)
         {
             // 30% chance
             selectedTile = tilesToChooseFrom[1];
-            if (selectedTile == goal) 
-            {
-                goalReached = true;
-                return selectedTile;                 
-            }
         }
         else
         {
             // 10% chance
             selectedTile = tilesToChooseFrom[2];
-            if (selectedTile == goal) 
-            {
-                goalReached = true;
-                return selectedTile; 
-            }
         }
+        //check if we found the goal
+        if (selectedTile == goal) 
+        {
+            goalReached = true;
+        }
+
         return selectedTile;
+    }
+
+    // Calculate hex distance between 2 hexes
+    public int GetHexDist(Vector3Int a, Vector3Int b)
+    {
+        // Convert flat-top axial (q, r) to cube (x, y, z)
+        int x1 = a.x;
+        int z1 = a.y;
+        int y1 = -x1 - z1;
+
+        int x2 = b.x;
+        int z2 = b.y;
+        int y2 = -x2 - z2;
+
+        int dx = Mathf.Abs(x1 - x2);
+        int dy = Mathf.Abs(y1 - y2);
+        int dz = Mathf.Abs(z1 - z2);
+
+        return Mathf.Max(dx, dy, dz);
+    }
+
+    // Helper function for GetBestNeighbours, used in sorting neighborList according
+    private int CompareNeighbors(Vector3Int n1, Vector3Int n2)
+    {
+        return GetHexDist(n1, goal).CompareTo(GetHexDist(n2, goal));
     }
 }
