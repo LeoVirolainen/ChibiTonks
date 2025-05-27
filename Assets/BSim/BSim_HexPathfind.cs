@@ -9,7 +9,9 @@ public class BSim_HexPathfind : MonoBehaviour
     public Tilemap tilemap;
     public int maxPathLength = 50;
     private bool goalReached = false;
-    
+    public TileBase signTile;
+    public float moveSpeed = 5f;
+
     // DUMBASS BOGO PATHFINDING!!!!
     // x is the amount of paths we generate
     // y is the cost of a path
@@ -30,15 +32,37 @@ public class BSim_HexPathfind : MonoBehaviour
     6. Do this process multiple times (e.g., 100 tries).
     7. Keep the path that reaches the goal and has the lowest cost or shortest length.
      */
+    private void Update()
+    {
+        
+    }
+
     public void PrintBestPath()
     {
-        List<Vector3Int> randPath = GetBestPath(100); //run GetBestPath with 100 paths        
+        List<Vector3Int> randPath = GetBestPath(1000); //run GetBestPath with 100 paths        
 
         Debug.Log("Best path steps:");
         for (int i = 0; i < randPath.Count; i++)
         {
             Vector3Int step = randPath[i];
             Debug.Log("Step " + i + ": (" + step.x + ", " + step.y + ", " + step.z + ")");
+            StartCoroutine(MoveAlongPath(randPath));
+        }
+    }
+
+    public IEnumerator MoveAlongPath(List<Vector3Int> path)
+    {
+        for (int i = 0; i < path.Count; i++)
+        {
+            // Convert grid (cell) position to world position
+            Vector3 worldPosition = tilemap.GetCellCenterWorld(path[i]);
+
+            // Move the object to that position
+            transform.position = worldPosition;
+
+            GetComponent<BSim_HexMove>().currentHexPosition = new Vector2Int(path[i].x, path[i].y);
+
+            yield return new WaitForSeconds(0.3f);
         }
     }
     
