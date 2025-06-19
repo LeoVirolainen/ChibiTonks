@@ -6,8 +6,9 @@ public class O_TroopControl : MonoBehaviour
 {
     public Animator a;
     public KeyCode doAnimKey;
-
+    public GameObject shootParticle;
     public int animState = 0;
+    public Transform barrel;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,6 +28,7 @@ public class O_TroopControl : MonoBehaviour
             else if (animState == 1)
             {
                 a.Play("Troop_FirenLoad");
+                Instantiate(shootParticle, barrel.position, barrel.rotation);
                 //animState = 0;
             }
         }
