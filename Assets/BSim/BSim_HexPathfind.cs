@@ -32,6 +32,14 @@ public class BSim_HexPathfind : MonoBehaviour
     6. Do this process multiple times (e.g., 100 tries).
     7. Keep the path that reaches the goal and has the lowest cost or shortest length.
      */
+    //helper function for converting hex coordinates
+    public static Vector2Int OffsetToAxial(Vector3Int offset)
+    {
+        int x = offset.x;
+        int y = offset.y - (offset.x / 2);  // even-q offset for flat-top hex
+        return new Vector2Int(x, y);
+    }
+
     private void Update()
     {
         
@@ -54,15 +62,23 @@ public class BSim_HexPathfind : MonoBehaviour
     {
         for (int i = 0; i < path.Count; i++)
         {
-            // Convert grid (cell) position to world position
-            Vector3 worldPosition = tilemap.GetCellCenterWorld(path[i]);
+            Vector3Int offset = path[i];
 
-            // Move the object to that position
+            // Move visually
+            Vector3 worldPosition = tilemap.GetCellCenterWorld(offset);
             transform.position = worldPosition;
 
-            GetComponent<BSim_HexMove>().currentHexPosition = new Vector2Int(path[i].x, path[i].y);
+            // Update logical position (convert offset to axial!)
+            Vector2Int axial = BSim_HexMove.OffsetToAxial(offset);
+            GetComponent<BSim_HexMove>().currentHexPosition = axial;
 
-            yield return new WaitForSeconds(0.3f);
+            Vector3Int reconvert = BSim_HexMove.AxialToOffset(GetComponent<BSim_HexMove>().currentHexPosition);
+            if (reconvert != path[i])
+            {
+                Debug.LogError($"DESYNC! Path says {path[i]}, but position says {reconvert}");
+            }
+
+            yield return new WaitForSeconds(moveSpeed);
         }
     }
     
@@ -70,39 +86,45 @@ public class BSim_HexPathfind : MonoBehaviour
     public List<Vector3Int> GetBestPath(int pathsAmt)
     {
         List<List<Vector3Int>> generatedPaths = new List<List<Vector3Int>>();
-
-        //generate (pathsAmt) paths
-        for (int i = 0; i < pathsAmt; i++) 
-        {
-            //use getRandomPath to get a new rand path
-            List<Vector3Int> newPath = GetRandomPath();
-
-            //add newly generated rand path to list of all new paths
-            generatedPaths.Add(newPath);
-        }
-
         //make new modifier for containing the best path
         List<Vector3Int> bestPath = null;
-
         //set an astronomical sum to this int so we always find a shorter path
-        int lowestCost = int.MaxValue; 
+        int lowestCost = int.MaxValue;
 
-        //go through paths and find shortest one
-        foreach (List<Vector3Int> path in generatedPaths)
+        //generate (pathsAmt) paths
+        for (int i = 0; i < pathsAmt; i++)
         {
-            int pathCost = path.Count;
-            Debug.Log("This path costs: " + path.Count);
-
-            if (pathCost < lowestCost)
+            try
             {
-                lowestCost = pathCost;
-                bestPath = path;
+                //use getRandomPath to get a new rand path
+                List<Vector3Int> newPath = GetRandomPath();
+
+                if (newPath == null || newPath.Count == 0)
+                    continue;
+
+                //add newly generated rand path to list of all new paths
+                generatedPaths.Add(newPath);
+
+                int pathCost = newPath.Count;
+                if (pathCost < lowestCost && newPath[newPath.Count - 1] == goal)
+                {
+                    lowestCost = pathCost;
+                    bestPath = newPath;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning("Path generation failed: " + ex.Message);
+                // Keep calm and skip this iteration.
             }
         }
+        if (bestPath == null)
+        {
+            Debug.LogError("No valid path found after " + pathsAmt + " attempts.");
+            return new List<Vector3Int>(); // return empty path so caller doesn't crash
+        }
 
-        Debug.Log("Lowest cost was: " + lowestCost);
-        print("Generated a path with " + bestPath.Count + " steps.");
-
+        Debug.Log("Best path length: " + bestPath.Count);
         return bestPath;
     }
     //returns a random-generated path to goal
@@ -115,8 +137,8 @@ public class BSim_HexPathfind : MonoBehaviour
         int steps = 0;
 
         //convert current 2D tile pos to 3D
-        Vector2Int tilePos2D = GetComponent<BSim_HexMove>().currentHexPosition;
-        Vector3Int tilePos3D = new Vector3Int(tilePos2D.x, tilePos2D.y, 0);
+        Vector2Int axial = GetComponent<BSim_HexMove>().currentHexPosition;
+        Vector3Int tilePos3D = BSim_HexMove.AxialToOffset(axial);
 
         //add start tile to path
         path.Add(tilePos3D);
@@ -221,10 +243,14 @@ public class BSim_HexPathfind : MonoBehaviour
     public List<Vector3Int> GetBestNeighbours(List<Vector3Int> neighborList)
     {
         //calculate hex dist to goal for each neighbor, then sort neighborList so that closest hex is at index 0, next closest 1, etc.
-        neighborList.Sort(CompareNeighbors);        
+        neighborList.Sort(CompareNeighbors);
 
-        //return the three closest hexes by trimming the list to the first 3 (or fewer if there aren't 3).
-        return neighborList.GetRange(0, Mathf.Min(3, neighborList.Count));
+        //how many neighbours to consider?
+        int howMany = Mathf.Min(5, neighborList.Count); 
+        //REMEMBER TO EDIT 244 AS WELL IF CHANGING THIS NUMBER!!!!
+
+        //return the three closest hexes by trimming the list to the first n neighbors (howMany) (or fewer if there aren't howMany).
+        return neighborList.GetRange(0, howMany);
 
     }
 
@@ -236,27 +262,37 @@ public class BSim_HexPathfind : MonoBehaviour
 
         Vector3Int selectedTile;
 
-        // fallback: less than 3 tiles, pick randomly from what's available
-        if (tilesToChooseFrom.Count < 3)
+        // fallback: less tiles than required, pick randomly from what's available
+        if (tilesToChooseFrom.Count < 5)
         {            
             int rInt = Random.Range(0, tilesToChooseFrom.Count);
             selectedTile = tilesToChooseFrom[rInt];
         }
 
-        if (roll < 60)
+        if (roll < 40)
         {
-            // 60% chance
+            // start% chance
             selectedTile = tilesToChooseFrom[0];
         }
-        else if (roll < 90)
+        else if (roll < 70)
         {
-            // 30% chance
+            // less% chance
             selectedTile = tilesToChooseFrom[1];
+        }
+        else if (roll < 85)
+        {
+            // less% chance
+            selectedTile = tilesToChooseFrom[2];
+        }
+        else if (roll < 93)
+        {
+            // less% chance
+            selectedTile = tilesToChooseFrom[3];
         }
         else
         {
-            // 10% chance
-            selectedTile = tilesToChooseFrom[2];
+            // even less% chance
+            selectedTile = tilesToChooseFrom[4];
         }
         //check if we found the goal
         if (selectedTile == goal) 

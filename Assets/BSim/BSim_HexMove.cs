@@ -8,12 +8,12 @@ public static class HexDirections
     // These are the axial directions for flat-top hexes.
     public static readonly Vector2Int[] axialDirections = new Vector2Int[]
     {
-        new Vector2Int(0, -1),  // Up
-        new Vector2Int(0, 1),   // Down
-        new Vector2Int(-1, 0),  // Top-left
-        new Vector2Int(1, -1),  // Top-right
-        new Vector2Int(-1, 1),  // Bottom-left
-        new Vector2Int(1, 0)    // Bottom-right
+        new Vector2Int(0, 1),   // Up
+        new Vector2Int(0, -1),  // Down
+        new Vector2Int(-1, 1),  // Top-left
+        new Vector2Int(1, 0),  // Top-right
+        new Vector2Int(-1, 0),  // Bottom-left
+        new Vector2Int(1, -1)    // Bottom-right
     };
 }
 
@@ -26,6 +26,14 @@ public class BSim_HexMove : MonoBehaviour
 
     public TileBase northTile;
     public TileBase southTile;
+    private void Update()
+    {
+        Vector2Int axial = currentHexPosition;
+        Vector3Int offset = AxialToOffset(axial);
+        Vector2Int roundTrip = OffsetToAxial(offset);
+
+        Debug.Log($"Axial: {axial}, Offset: {offset}, RoundTrip: {roundTrip}");
+    }
     public void MoveInDirection(int directionIndex)
     {
         // Clamp directionIndex between 0-5
@@ -45,7 +53,20 @@ public class BSim_HexMove : MonoBehaviour
         float z = hexSize * Mathf.Sqrt(3f) * (axial.y + axial.x / 2f);
         return new Vector3(x, y, z);
     }
-
+    public static Vector2Int OffsetToAxial(Vector3Int offset)
+    {
+        int col = offset.x;
+        int row = offset.y;
+        int q = col;
+        int r = row - (col / 2);
+        return new Vector2Int(q, r);
+    }
+    public static Vector3Int AxialToOffset(Vector2Int axial)
+    {
+        int col = axial.x;
+        int row = axial.y + (col / 2);
+        return new Vector3Int(col, row, 0);
+    }
     public void ScanTile()
     {
         Vector3 worldPosition = transform.position;
