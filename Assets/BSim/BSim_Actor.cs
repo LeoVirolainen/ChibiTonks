@@ -9,7 +9,7 @@ public class BSim_Actor : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        CalculateNextAction();
     }
 
     // Update is called once per frame
@@ -20,8 +20,9 @@ public class BSim_Actor : MonoBehaviour
 
     public void DoAction()
     {
-        myNextAction.Invoke();
-        //CalculateNextAction();
+        myNextAction.Invoke();        
+        myNextAction.RemoveAllListeners();
+        CalculateNextAction();
     }
     void CalculateNextAction()
     {
@@ -34,7 +35,7 @@ public class BSim_Actor : MonoBehaviour
     public void DoMovementTowardsGoal()
     {
         var pf = GetComponent<BSim_HexPathfind>();
-        if (pf.goalReached) //if there is no existing path
+        if (pf.myPath.Count == 0) //if there is no existing path
             pf.CalculateNewPath();
         else
             pf.TakeNextStepOnPath();

@@ -8,7 +8,8 @@ public class BSim_HexPathfind : MonoBehaviour
     public Vector3Int goal;
     public Tilemap tilemap;
     public int maxPathLength = 50;
-    public bool goalReached = true;
+    public bool goalReached = true; //for checking when a candidate path reaches the goal
+    //public bool goalEntered = true; //for checking if we are ON a goal
     public TileBase signTile;
     public float moveSpeed = 5f;
 
@@ -58,6 +59,8 @@ public class BSim_HexPathfind : MonoBehaviour
         if(nextStep >= myPath.Count)
         {
             Debug.Log("Reached end of path.");
+            //goalEntered = true;
+            myPath.Clear();
             return;
         }
         Vector3Int nextStepHex = myPath[nextStep];
@@ -119,6 +122,8 @@ public class BSim_HexPathfind : MonoBehaviour
     //Generate (pathsAmt) paths, give them a score & choose the cheapest one
     public List<Vector3Int> GetBestPath(int pathsAmt)
     {
+        //goalEntered = false;
+
         List<List<Vector3Int>> generatedPaths = new List<List<Vector3Int>>();
         //make new modifier for containing the best path
         List<Vector3Int> bestPath = null;
@@ -158,7 +163,7 @@ public class BSim_HexPathfind : MonoBehaviour
             return new List<Vector3Int>(); // return empty path so caller doesn't crash
         }
 
-        Debug.Log("Best path length: " + bestPath.Count);
+        Debug.Log(gameObject.name + ": Best path length: " + bestPath.Count);
         return bestPath;
     }
     //returns a random-generated path to goal
