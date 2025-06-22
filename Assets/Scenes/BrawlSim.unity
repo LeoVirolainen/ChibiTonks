@@ -1595,6 +1595,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 288727797}
   m_CullTransparentMesh: 1
+--- !u!1 &348386899
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 348386900}
+  - component: {fileID: 348386901}
+  m_Layer: 0
+  m_Name: ActionsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &348386900
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 348386899}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &348386901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 348386899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e61605c50e199ab489e7cb9d1652a59e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turnCooldown: 1
+  allActors: []
 --- !u!1 &365282884
 GameObject:
   m_ObjectHideFlags: 0
@@ -25469,6 +25515,7 @@ GameObject:
   - component: {fileID: 1715402404}
   - component: {fileID: 1715402403}
   - component: {fileID: 1715402406}
+  - component: {fileID: 1715402407}
   m_Layer: 0
   m_Name: Troop
   m_TagString: Untagged
@@ -25488,7 +25535,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5781bab454c4f249939f5ba4a894ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentHexPosition: {x: 0, y: 0}
+  currentHexPosition: {x: 0, y: 0, z: 0}
   grid: {fileID: 1292726884}
   tilemap: {fileID: 1799166173}
   northTile: {fileID: 11400000, guid: 5968d3a220035674ba0656fb12712d51, type: 2}
@@ -25576,8 +25623,37 @@ MonoBehaviour:
   goal: {x: -23, y: -16, z: 0}
   tilemap: {fileID: 1799166173}
   maxPathLength: 100
+  goalReached: 1
   signTile: {fileID: 11400000, guid: b8b33e8585a25654a96c34fbe8ee1a3f, type: 2}
   moveSpeed: 0.1
+  myPath: []
+--- !u!114 &1715402407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1715402402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 018b8a7a1bff57d4b8c7f0014dd0e802, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myNextAction:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1715402407}
+        m_TargetAssemblyTypeName: BSim_Actor, Assembly-CSharp
+        m_MethodName: DoMovementTowardsGoal
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1762100536
 GameObject:
   m_ObjectHideFlags: 0
@@ -41729,3 +41805,4 @@ SceneRoots:
   - {fileID: 483724419}
   - {fileID: 1715402405}
   - {fileID: 972438126}
+  - {fileID: 348386900}

@@ -19,7 +19,7 @@ public static class HexDirections
 
 public class BSim_HexMove : MonoBehaviour
 {
-    public Vector2Int currentHexPosition; // Axial coords
+    public Vector3Int currentHexPosition; // Offset coords
     public Grid grid;
 
     public Tilemap tilemap;
@@ -28,11 +28,11 @@ public class BSim_HexMove : MonoBehaviour
     public TileBase southTile;
     private void Update()
     {
-        Vector2Int axial = currentHexPosition;
-        Vector3Int offset = AxialToOffset(axial);
+        /*Vector2Int axial = OffsetToAxial(currentHexPosition);
+        Vector3Int offset = currentHexPosition;
         Vector2Int roundTrip = OffsetToAxial(offset);
 
-        Debug.Log($"Axial: {axial}, Offset: {offset}, RoundTrip: {roundTrip}");
+        Debug.Log($"Axial: {axial}, Offset: {offset}, RoundTrip: {roundTrip}");*/
     }
     public void MoveInDirection(int directionIndex)
     {
@@ -40,10 +40,14 @@ public class BSim_HexMove : MonoBehaviour
         directionIndex = Mathf.Clamp(directionIndex, 0, 5);
 
         Vector2Int direction = HexDirections.axialDirections[directionIndex];
-        currentHexPosition += direction;
+        Vector2Int currentAxial = OffsetToAxial(currentHexPosition);
+        currentAxial += direction;
 
-        Vector3 worldPos = HexToWorld(currentHexPosition, .5f);
+        Vector3 worldPos = HexToWorld(currentAxial, .5f);
         transform.position = worldPos;
+
+        //update current pos
+        currentHexPosition = AxialToOffset(currentAxial);
     }
 
     public static Vector3 HexToWorld(Vector2Int axial, float hexSize)

@@ -8,9 +8,13 @@ public class BSim_HexPathfind : MonoBehaviour
     public Vector3Int goal;
     public Tilemap tilemap;
     public int maxPathLength = 50;
-    private bool goalReached = false;
+    public bool goalReached = true;
     public TileBase signTile;
     public float moveSpeed = 5f;
+
+    public List<Vector3Int> myPath = new List<Vector3Int>();
+    private int currentStepOnPath = 0;
+    int nextStep = 0;
 
     // DUMBASS BOGO PATHFINDING!!!!
     // x is the amount of paths we generate
@@ -32,6 +36,7 @@ public class BSim_HexPathfind : MonoBehaviour
     6. Do this process multiple times (e.g., 100 tries).
     7. Keep the path that reaches the goal and has the lowest cost or shortest length.
      */
+
     //helper function for converting hex coordinates
     public static Vector2Int OffsetToAxial(Vector3Int offset)
     {
@@ -39,23 +44,52 @@ public class BSim_HexPathfind : MonoBehaviour
         int y = offset.y - (offset.x / 2);  // even-q offset for flat-top hex
         return new Vector2Int(x, y);
     }
-
-    private void Update()
+    public void CalculateNewPath()
     {
-        
+        myPath = GetBestPath(1000); //run GetBestPath with 1000 paths
+    }
+    public void TakeNextStepOnPath()
+    {
+        if (myPath == null || myPath.Count == 0)
+        {
+            Debug.LogWarning("No path calculated.");
+            return;
+        }
+        if(nextStep >= myPath.Count)
+        {
+            Debug.Log("Reached end of path.");
+            return;
+        }
+        Vector3Int nextStepHex = myPath[nextStep];
+
+        // Move visually
+        Vector3 worldPosition = tilemap.GetCellCenterWorld(nextStepHex);
+        transform.position = worldPosition;
+
+        // Update logical position (convert offset to axial!)
+        //Vector2Int axial = BSim_HexMove.OffsetToAxial(offset);
+        GetComponent<BSim_HexMove>().currentHexPosition = nextStepHex;
+
+        Vector3Int reconvert = GetComponent<BSim_HexMove>().currentHexPosition;
+        if (reconvert != myPath[nextStep])
+        {
+            Debug.LogError($"DESYNC! Path says {myPath[nextStep]}, but position says {reconvert}");
+        }
+        currentStepOnPath = nextStep;
+        nextStep++;
     }
 
     public void PrintBestPath()
     {
-        List<Vector3Int> randPath = GetBestPath(1000); //run GetBestPath with 100 paths        
+        myPath = GetBestPath(1000); //run GetBestPath with 1000 paths        
 
         Debug.Log("Best path steps:");
-        for (int i = 0; i < randPath.Count; i++)
+        for (int i = 0; i < myPath.Count; i++)
         {
-            Vector3Int step = randPath[i];
+            Vector3Int step = myPath[i];
             Debug.Log("Step " + i + ": (" + step.x + ", " + step.y + ", " + step.z + ")");
-            StartCoroutine(MoveAlongPath(randPath));
         }
+        StartCoroutine(MoveAlongPath(myPath));
     }
 
     public IEnumerator MoveAlongPath(List<Vector3Int> path)
@@ -69,10 +103,10 @@ public class BSim_HexPathfind : MonoBehaviour
             transform.position = worldPosition;
 
             // Update logical position (convert offset to axial!)
-            Vector2Int axial = BSim_HexMove.OffsetToAxial(offset);
-            GetComponent<BSim_HexMove>().currentHexPosition = axial;
+            //Vector2Int axial = BSim_HexMove.OffsetToAxial(offset);
+            GetComponent<BSim_HexMove>().currentHexPosition = offset;
 
-            Vector3Int reconvert = BSim_HexMove.AxialToOffset(GetComponent<BSim_HexMove>().currentHexPosition);
+            Vector3Int reconvert = GetComponent<BSim_HexMove>().currentHexPosition;
             if (reconvert != path[i])
             {
                 Debug.LogError($"DESYNC! Path says {path[i]}, but position says {reconvert}");
@@ -137,8 +171,9 @@ public class BSim_HexPathfind : MonoBehaviour
         int steps = 0;
 
         //convert current 2D tile pos to 3D
-        Vector2Int axial = GetComponent<BSim_HexMove>().currentHexPosition;
-        Vector3Int tilePos3D = BSim_HexMove.AxialToOffset(axial);
+        //Vector2Int axial = GetComponent<BSim_HexMove>().currentHexPosition;
+        //Vector3Int tilePos3D = BSim_HexMove.AxialToOffset(axial);
+        Vector3Int tilePos3D = GetComponent<BSim_HexMove>().currentHexPosition;
 
         //add start tile to path
         path.Add(tilePos3D);
@@ -267,6 +302,11 @@ public class BSim_HexPathfind : MonoBehaviour
         {            
             int rInt = Random.Range(0, tilesToChooseFrom.Count);
             selectedTile = tilesToChooseFrom[rInt];
+            //check if we found the goal
+            if (selectedTile == goal)
+            {
+                goalReached = true;
+            }
         }
 
         if (roll < 40)
