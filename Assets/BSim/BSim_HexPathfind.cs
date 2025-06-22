@@ -61,7 +61,7 @@ public class BSim_HexPathfind : MonoBehaviour
             return;
         }
         Vector3Int nextStepHex = myPath[nextStep];
-
+        print("next step: " + nextStepHex);
         // Move visually
         Vector3 worldPosition = tilemap.GetCellCenterWorld(nextStepHex);
         transform.position = worldPosition;

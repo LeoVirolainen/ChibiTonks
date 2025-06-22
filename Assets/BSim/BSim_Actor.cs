@@ -21,7 +21,7 @@ public class BSim_Actor : MonoBehaviour
     public void DoAction()
     {
         myNextAction.Invoke();
-        CalculateNextAction();
+        //CalculateNextAction();
     }
     void CalculateNextAction()
     {
