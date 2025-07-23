@@ -61,6 +61,7 @@ public class BSim_HexPathfind : MonoBehaviour
             Debug.Log("Reached end of path.");
             //goalEntered = true;
             myPath.Clear();
+
             return;
         }
         Vector3Int nextStepHex = myPath[nextStep];

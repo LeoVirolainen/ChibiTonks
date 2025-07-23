@@ -1,0 +1,54 @@
+Brawl Simulator (BSim) TO-DO:
+(MVP)
+
+1. what needs to happen?
+	a troops fight
+	b troops occupy land
+	c troops take cities
+	d troops die
+	e troops decide what to do based on priorities (different for s/n?)
+2. what would be nice?
+	a cities spawn new troops
+	b cities can run out of manpower
+	c lots of user feedback juice
+
+	how to achieve?
+		1a
+			- troops stop when enemy in next tile
+				- needa scan neighbouring tiles after each move
+				- needa tell troop to stop if enemy near
+			- opposing troops duke it out when next to each other
+				- run some attack function that compares each troops' manpower/hp/thing (+ possible other stats)
+					- remember starting manpower
+					- see how much damage we do if any (is there a min amt that always gets dealt?)
+						- something like: 
+							our manpower = say 500: damage = 5 * random 0.6-1.4 (+ terrain bonuses) = say 6.4 * 10
+							enemy manpower = say 1500: damage = 15 * rand 0.6-1.4 (+ terrain bonus) = say 17.8 * 10
+					- (chance to start fleeing if manpower goes to below 25% of start)
+					- die if our manpower goes to 0
+		1b
+			- when moving, check if we're on enemy's tile
+				- if yes, convert.
+		1c
+			- troops have a city as their goal, towards which they strive to move
+			- the goal city is chosen every x turns (say 5)
+			- by getting cities within x distance (say 20), comparing distance to city and city's strength (manpower)
+				Leeds:			distance 12 tiles,	manpower 300 000
+				manchester:		distance 5 tiles,	manpower 120 000
+				northampton:	distance 6 tiles,	manpower 100 000
+					- (manpower / 100 000) / distance = score - - - this system favours picking targets with low manpower
+					- lowest score gets chosen
+						leeds 3 / 12 = 0,25 ; manch 1.2 / 5 = 0,24 ; north 1 / 6 = 0,16
+							Northampton is target!
+		1d 
+			(done)
+		1e
+			- attack city, defend city, (more potential goals?)
+
+			- north: defend city, attack city
+			- south: attack city, defend city
+
+			- get all cities within reasonable (x) distance
+			- see which ones are under attack or weakened
+			- if more than one:
+			- south attacks (by logic in 1c), north defends (by logic in 1c)

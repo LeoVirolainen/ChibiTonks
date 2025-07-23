@@ -4,8 +4,17 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class BSim_Actor : MonoBehaviour
-{
+{    
+    public enum ActorType
+    {
+        Troop,
+        City
+    }
+    public ActorType type;
+
     public UnityEvent myNextAction;
+    public bool isBlue;
+    public List<BSim_HexPathfind> nearbyEnemies = new List<BSim_HexPathfind>();
     // Start is called before the first frame update
     void Start()
     {
@@ -26,6 +35,15 @@ public class BSim_Actor : MonoBehaviour
     }
     void CalculateNextAction()
     {
+        if (type == ActorType.Troop)
+        {
+            if (nearbyEnemies.Count > 0)
+            {
+                int rand = Random.Range(0, nearbyEnemies.Count - 1);
+                var target = nearbyEnemies[rand];
+                print("Found " + nearbyEnemies[rand].name + "! Attacking now.");
+            }
+        }
         bool moving = true;
         if (moving)
         {
@@ -39,5 +57,26 @@ public class BSim_Actor : MonoBehaviour
             pf.CalculateNewPath();
         else
             pf.TakeNextStepOnPath();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        var actor = other.gameObject.GetComponent<BSim_Actor>();
+        var pathfind = other.gameObject.GetComponent<BSim_HexPathfind>();
+
+        if (pathfind != null && actor != null && actor.isBlue != isBlue)
+        {
+            nearbyEnemies.Add(pathfind);
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        var actor = other.gameObject.GetComponent<BSim_Actor>();
+        var pathfind = other.gameObject.GetComponent<BSim_HexPathfind>();
+
+        if (pathfind != null && actor != null && actor.isBlue != isBlue)
+        {
+            nearbyEnemies.Remove(pathfind);
+        }
     }
 }
