@@ -661,8 +661,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   a: {fileID: 0}
-  doAnimKey: 256
+  doAnimKey: 257
   shootParticle: {fileID: 5829793649800860905, guid: 5bfd311cf10f24e418ff5b67ad851640,
     type: 3}
-  animState: 0
   barrel: {fileID: 6509347569043544311}
