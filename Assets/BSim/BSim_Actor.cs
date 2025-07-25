@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class BSim_Actor : MonoBehaviour
-{    
+{
+    private BSim_HexPathfind pf;
     public enum ActorType
     {
         Troop,
@@ -15,16 +16,25 @@ public class BSim_Actor : MonoBehaviour
     public UnityEvent myNextAction;
     public bool isBlue;
     public List<BSim_HexPathfind> nearbyEnemies = new List<BSim_HexPathfind>();
-    // Start is called before the first frame update
+
+    public float hexWidth = 1.0f; // Width of the hexagon
+    public float hexHeight = 0.8659766f; // Height of the hexagon
     void Start()
     {
+        pf = GetComponent<BSim_HexPathfind>();
         CalculateNextAction();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        //draw line to move target if there is one
+        if (pf.myPath.Count != 0)
+        {
+            Color color = new Color(0, 0, 1.0f);
+            // Convert Vector3Int to Vector3 for flat-top hex grid
+            Vector3 goalPosition = HexToWorld(pf.goal);
+            Debug.DrawLine(transform.position, goalPosition, color);            
+        }
     }
 
     public void DoAction()
@@ -35,6 +45,7 @@ public class BSim_Actor : MonoBehaviour
     }
     void CalculateNextAction()
     {
+        bool moving = false;
         if (type == ActorType.Troop)
         {
             if (nearbyEnemies.Count > 0)
@@ -42,9 +53,13 @@ public class BSim_Actor : MonoBehaviour
                 int rand = Random.Range(0, nearbyEnemies.Count - 1);
                 var target = nearbyEnemies[rand];
                 print("Found " + nearbyEnemies[rand].name + "! Attacking now.");
+
+            }
+            else
+            {
+                moving = true;
             }
         }
-        bool moving = true;
         if (moving)
         {
             myNextAction.AddListener(DoMovementTowardsGoal);
@@ -52,7 +67,6 @@ public class BSim_Actor : MonoBehaviour
     }
     public void DoMovementTowardsGoal()
     {
-        var pf = GetComponent<BSim_HexPathfind>();
         if (pf.myPath.Count == 0) //if there is no existing path
             pf.CalculateNewPath();
         else
@@ -78,5 +92,13 @@ public class BSim_Actor : MonoBehaviour
         {
             nearbyEnemies.Remove(pathfind);
         }
+    }
+    Vector3 HexToWorld(Vector3Int hex)
+    {
+        // Calculate the world position based on hex coordinates
+        float x = hexWidth * (hex.x + 0.5f * hex.y); // Adjust x based on y
+        float z = hexHeight * hex.y; // Adjust z based on y
+
+        return new Vector3(x, 0, z); // Assuming y is 0 for flat-top hexes
     }
 }

@@ -49,6 +49,29 @@ public class O_TroopControl : MonoBehaviour
         }
     }
 
+    public void PresentOrFire()
+    {
+        if (isAnimating) return;
+
+        if (!brain.troops.Contains(gameObject.GetComponent<O_TroopControl>()))
+        {
+            return;
+        }
+        if (animState == 0)
+        {
+            // FIRST PRESS: Random delay before presenting arms
+            isAnimating = true;
+            float delay = Random.Range(0f, 0.3f);
+            StartCoroutine(DelayedPresent(delay));
+        }
+        else if (animState == 1 && Time.time >= hasReloadedTime)
+        {
+            isAnimating = true;
+            float fireDelay = Random.Range(0f, 0.3f);
+            StartCoroutine(DelayedFire(fireDelay));
+        }
+    }
+
     // Coroutine for delayed "Present Arms" with random delay
     IEnumerator DelayedPresent(float delay)
     {
