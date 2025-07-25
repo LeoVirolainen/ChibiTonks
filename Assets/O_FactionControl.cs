@@ -53,6 +53,7 @@ public class O_FactionControl : MonoBehaviour
                 t.a.Play("Troop_Die");
             else
                 t.a.Play("Troop_Die1");
+            t.transform.SetParent(null);
         }
     }
 }

@@ -17,6 +17,12 @@ public class BSim_HexPathfind : MonoBehaviour
     private int currentStepOnPath = 0;
     int nextStep = 0;
 
+    public AnimationCurve moveCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    private float moveDuration;
+
+    private Vector3 startPos;
+    private Vector3 targetPos;
+
     // DUMBASS BOGO PATHFINDING!!!!
     // x is the amount of paths we generate
     // y is the cost of a path
@@ -37,7 +43,10 @@ public class BSim_HexPathfind : MonoBehaviour
     6. Do this process multiple times (e.g., 100 tries).
     7. Keep the path that reaches the goal and has the lowest cost or shortest length.
      */
-
+    private void Start()
+    {
+        moveDuration = FindObjectOfType<BSim_ActionsManager>().turnCooldown - 0.1f;
+    }
     //helper function for converting hex coordinates
     public static Vector2Int OffsetToAxial(Vector3Int offset)
     {
@@ -58,17 +67,36 @@ public class BSim_HexPathfind : MonoBehaviour
         }
         if(nextStep >= myPath.Count)
         {
-            Debug.Log("Reached end of path.");
+            Debug.Log(name + " Reached end of path.");
             //goalEntered = true;
             myPath.Clear();
 
             return;
         }
         Vector3Int nextStepHex = myPath[nextStep];
-        print("next step: " + nextStepHex);
+        //print("next step: " + nextStepHex);
         // Move visually
         Vector3 worldPosition = tilemap.GetCellCenterWorld(nextStepHex);
-        transform.position = worldPosition;
+        //check if there is another moving tile here
+        BSim_HexPathfind[] allMovers = GameObject.FindObjectsOfType<BSim_HexPathfind>();
+        foreach (var mover in allMovers)
+        {
+            var actor = mover.GetComponent<BSim_Actor>();
+            if (actor && mover != GetComponent<BSim_HexPathfind>() && nextStepHex != goal &&
+                mover.GetComponent<BSim_HexMove>().currentHexPosition == nextStepHex)
+            {
+                Debug.Log($"{name}: Path blocked by {mover.name} at {nextStepHex}, aborting step.");                
+                myPath.Clear();
+                nextStep = 0;
+                currentStepOnPath = 0;
+                return;
+            }
+        }
+        //lerp movement
+        StopAllCoroutines();
+        startPos = transform.position;
+        targetPos = worldPosition;
+        StartCoroutine(LerpWithCurve());
 
         // Update logical position (convert offset to axial!)
         //Vector2Int axial = BSim_HexMove.OffsetToAxial(offset);
@@ -164,7 +192,7 @@ public class BSim_HexPathfind : MonoBehaviour
             return new List<Vector3Int>(); // return empty path so caller doesn't crash
         }
 
-        Debug.Log(gameObject.name + ": Best path length: " + bestPath.Count);
+        //Debug.Log(gameObject.name + ": Best path length: " + bestPath.Count);
         return bestPath;
     }
     //returns a random-generated path to goal
@@ -372,5 +400,23 @@ public class BSim_HexPathfind : MonoBehaviour
     private int CompareNeighbors(Vector3Int n1, Vector3Int n2)
     {
         return GetHexDist(n1, goal).CompareTo(GetHexDist(n2, goal));
+    }
+
+    //Helper function for lerping movement
+    private IEnumerator LerpWithCurve()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < moveDuration)
+        {
+            float t = elapsed / moveDuration;
+            float curveValue = moveCurve.Evaluate(t);
+            transform.position = Vector3.Lerp(startPos, targetPos, curveValue);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = targetPos; // Snap just to be safe
     }
 }

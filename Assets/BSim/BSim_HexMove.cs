@@ -49,7 +49,28 @@ public class BSim_HexMove : MonoBehaviour
         //update current pos
         currentHexPosition = AxialToOffset(currentAxial);
     }
+    public static Vector3Int[] GetNeighborOffsets()
+    {
+        // These are axial directions for a hex grid (pointy-topped)
+        Vector2Int[] axialDirections = new Vector2Int[]
+        {
+        new Vector2Int(1, 0),   // East
+        new Vector2Int(1, -1),  // Northeast
+        new Vector2Int(0, -1),  // Northwest
+        new Vector2Int(-1, 0),  // West
+        new Vector2Int(-1, 1),  // Southwest
+        new Vector2Int(0, 1),   // Southeast
+        };
 
+        Vector3Int[] offsets = new Vector3Int[axialDirections.Length];
+
+        for (int i = 0; i < axialDirections.Length; i++)
+        {
+            offsets[i] = AxialToOffset(axialDirections[i]);
+        }
+
+        return offsets;
+    }
     public static Vector3 HexToWorld(Vector2Int axial, float hexSize)
     {
         float x = hexSize * (3f / 2f) * axial.x;

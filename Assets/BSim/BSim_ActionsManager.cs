@@ -27,6 +27,11 @@ public class BSim_ActionsManager : MonoBehaviour
 
     void RunAllActorEvents()
     {
+        //loop thru the list and delete any null members
+        allActors.RemoveAll(delegate (BSim_Actor actor)
+        {
+            return actor == null;
+        });
         foreach (BSim_Actor a in allActors)
         {
             a.DoAction();
