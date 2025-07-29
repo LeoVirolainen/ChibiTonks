@@ -16,6 +16,8 @@ public class O_TroopControl : MonoBehaviour
 
     private O_FactionControl brain;
 
+    [SerializeField] private float bootHeight;
+
     void Start()
     {
         a = GetComponent<Animator>();
@@ -25,6 +27,23 @@ public class O_TroopControl : MonoBehaviour
 
     void Update()
     {
+        //make sure boots are on ground        
+        Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y + 5, transform.position.z), Vector3.down);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 10))
+        {
+            Debug.DrawLine(new Vector3(transform.position.x, transform.position.y + 5, transform.position.z), hit.point, Color.red); // Visual debug
+            Debug.Log("Hit: " + hit.collider.name + " at distance: " + hit.distance);
+            bootHeight = hit.point.y;
+            transform.position = new Vector3(transform.position.x, bootHeight, transform.position.z);
+        }
+        else
+        {
+            Debug.DrawLine(transform.position, transform.position + Vector3.down * 10, Color.blue);
+            Debug.Log("No ground hit detected.");
+        }        
+
         if (isAnimating) return;
 
         if (Input.GetKeyDown(doAnimKey))
