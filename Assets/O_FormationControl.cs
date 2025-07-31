@@ -7,11 +7,12 @@ public class O_FormationControl : MonoBehaviour
     public AnimationCurve moveCurve;
     public KeyCode moveKey;
 
-    public Transform goal;
+    public Transform currentMoveGoal;
     public Transform activeEnemy;
     private Vector3 startPos;
     private Vector3 goalPos;
     public List<O_TroopControl> troops;
+    public Transform[] myMoveTargets = new Transform[7];
 
     private Vector3 velocity = Vector3.zero; // Internal velocity tracker
 
@@ -41,7 +42,7 @@ public class O_FormationControl : MonoBehaviour
     {
         StopAllCoroutines();
         startPos = transform.position;
-        goalPos = new Vector3(goal.position.x, transform.position.y, goal.position.z);
+        goalPos = new Vector3(currentMoveGoal.position.x, transform.position.y, currentMoveGoal.position.z);
         isMoving = true;
         StartCoroutine(LerpWithCurve());
     }
@@ -55,7 +56,7 @@ public class O_FormationControl : MonoBehaviour
     private IEnumerator LerpWithCurve()
     {
         float elapsed = 0f;
-        float duration = Vector3.Distance(transform.position, goal.position) / 4;
+        float duration = Vector3.Distance(transform.position, currentMoveGoal.position) / 4;
 
         while (elapsed < duration)
         {

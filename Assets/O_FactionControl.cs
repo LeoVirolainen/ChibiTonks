@@ -5,12 +5,16 @@ using UnityEngine;
 public class O_FactionControl : MonoBehaviour
 {
     public List<O_TroopControl> troops;
+    public List<O_FormationControl> formations;
     public KeyCode killKey;
-    // Start is called before the first frame update
+
+    public int currentPhase;
+    //0(A), 1(B), 2(B I), 3(C), 4(C I), 5(D), 6(D I)
+
     void Start()
     {
         troops = new List<O_TroopControl>(GetComponentsInChildren<O_TroopControl>());
-
+        formations = new List<O_FormationControl>(GetComponentsInChildren<O_FormationControl>());
     }
 
     // Update is called once per frame
@@ -44,6 +48,7 @@ public class O_FactionControl : MonoBehaviour
             }
         }
     }
+    //helper function for triggering and delaying troop death
     IEnumerator WaitAndAnimate(O_TroopControl t, float time, int animId)
     {
         yield return new WaitForSeconds(time);
@@ -54,6 +59,27 @@ public class O_FactionControl : MonoBehaviour
             else
                 t.a.Play("Troop_Die1");
             t.transform.SetParent(null);
+        }
+    }
+    public void NextPhase()
+    {
+        currentPhase++;
+        DoFormationMovements();
+    }
+    public void PrevPhase()
+    {
+        currentPhase--;
+        DoFormationMovements();
+    }
+    public void DoFormationMovements()
+    {
+        foreach (var f in formations)
+        {
+            if (f.myMoveTargets[currentPhase] != null)
+            {
+                f.currentMoveGoal = f.myMoveTargets[currentPhase];
+                f.WalkToGoal();
+            }
         }
     }
 }
