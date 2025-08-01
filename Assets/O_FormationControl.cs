@@ -13,8 +13,7 @@ public class O_FormationControl : MonoBehaviour
     private Vector3 goalPos;
     public List<O_TroopControl> troops;
     public Transform[] myMoveTargets = new Transform[7];
-
-    private Vector3 velocity = Vector3.zero; // Internal velocity tracker
+    public Transform[] myEnemies = new Transform[7];
 
     private bool isMoving = false;
     // Start is called before the first frame update

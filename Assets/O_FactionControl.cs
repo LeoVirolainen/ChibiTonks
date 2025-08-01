@@ -63,13 +63,29 @@ public class O_FactionControl : MonoBehaviour
     }
     public void NextPhase()
     {
-        currentPhase++;
-        DoFormationMovements();
+        if (currentPhase < 6)
+        {
+            currentPhase++;
+            DoFormationMovements();
+            SetActiveEnemies();
+        }
+        else
+        {
+            print("Reached final phase!");
+        }
     }
     public void PrevPhase()
     {
-        currentPhase--;
-        DoFormationMovements();
+        if (currentPhase > 0)
+        {
+            currentPhase--;
+            DoFormationMovements();
+            SetActiveEnemies();
+        }
+        else
+        {
+            print("Can't rewind further!");
+        }
     }
     public void DoFormationMovements()
     {
@@ -78,6 +94,17 @@ public class O_FactionControl : MonoBehaviour
             if (f.myMoveTargets[currentPhase] != null)
             {
                 f.currentMoveGoal = f.myMoveTargets[currentPhase];
+                f.WalkToGoal();
+            }
+        }
+    }
+    public void SetActiveEnemies()
+    {
+        foreach (var f in formations)
+        {
+            if (f.myEnemies[currentPhase] != null)
+            {
+                f.activeEnemy = f.myEnemies[currentPhase];
                 f.WalkToGoal();
             }
         }
