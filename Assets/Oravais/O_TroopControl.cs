@@ -20,7 +20,8 @@ public class O_TroopControl : MonoBehaviour
 
     void Start()
     {
-        a = GetComponent<Animator>();
+        if (GetComponent<Animator>() != null)
+            a = GetComponent<Animator>();
         brain = GetComponentInParent<O_FactionControl>();
         myRandTimer = Random.Range(0.0f, 0.3f);
     }
@@ -68,10 +69,8 @@ public class O_TroopControl : MonoBehaviour
         }
     }
 
-    public void PresentOrFire()
+    public void PreparePresentOrFire()
     {
-        if (isAnimating) return;
-
         if (!brain.troops.Contains(gameObject.GetComponent<O_TroopControl>()))
         {
             return;
@@ -96,8 +95,11 @@ public class O_TroopControl : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
+        if (a == null)
+        {
+            yield break;
+        }
         a.Play("Troop_Present");
-
         StartCoroutine(WaitForAnimation("Troop_Present", () =>
         {
             animState = 1;
@@ -108,6 +110,10 @@ public class O_TroopControl : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
+        if (a == null)
+        {
+            yield break;
+        }
         a.Play("Troop_FirenLoad");
         Instantiate(shootParticle, barrel.position, barrel.rotation);
         hasReloadedTime = Time.time + 6f + Random.Range(0f, 0.3f); // new reload delay

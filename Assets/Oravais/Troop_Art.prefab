@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3146824828569742840
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8348692000319924010}
+  m_Layer: 0
+  m_Name: barrel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8348692000319924010
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3146824828569742840}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.1463841, y: -0.6917886, z: -0.14638402, w: 0.69178903}
+  m_LocalPosition: {x: -0.621, y: 0.62, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7202359392289012299}
+  m_LocalEulerAnglesHint: {x: -23.895, y: -90, z: 0}
 --- !u!1 &7070288160120863975
 GameObject:
   m_ObjectHideFlags: 0
@@ -194,7 +225,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.000000030173553, y: 0.0000000028352645, z: 0.5406287, w: 0.8412614}
   m_LocalPosition: {x: -0.101, y: 0.405, z: 0}
-  m_LocalScale: {x: 0.3, y: 1.1349666, z: 0.3}
+  m_LocalScale: {x: 0.3, y: 1.134967, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7202359392289012299}
@@ -258,6 +289,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7202359392289012299}
+  - component: {fileID: 5675779607951017404}
   - component: {fileID: 1904713911600337664}
   m_Layer: 0
   m_Name: Troop_Art
@@ -274,7 +306,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8283293524309143208}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -1, z: -0, w: -0.00000035762784}
+  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
   m_LocalPosition: {x: -0, y: -1.789, z: 0.57}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -282,8 +314,30 @@ Transform:
   - {fileID: 3479490231751774798}
   - {fileID: 7832276798911534527}
   - {fileID: 1044374285193043171}
+  - {fileID: 8348692000319924010}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
+--- !u!95 &5675779607951017404
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8283293524309143208}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 48e4fd4bae69dd443887f79c53e04de3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &1904713911600337664
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,6 +352,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   a: {fileID: 0}
   doAnimKey: 0
-  shootParticle: {fileID: 0}
-  barrel: {fileID: 0}
+  shootParticle: {fileID: 5829793649800860905, guid: 7769a416698102344839f5ae81b78907,
+    type: 3}
+  barrel: {fileID: 8348692000319924010}
   bootHeight: 0

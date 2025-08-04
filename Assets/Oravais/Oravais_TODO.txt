@@ -1,0 +1,9 @@
+TO DO:
+
+- automated troop dying when fired upon
+- phase playhead
+- sound effects
+- main combat phase
+- fine tune troop positions (esp. swedes south of lillträsk)
+- put name labels on troops
+- info text for each phase
