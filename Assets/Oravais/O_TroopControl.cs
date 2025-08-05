@@ -10,8 +10,8 @@ public class O_TroopControl : MonoBehaviour
     public Transform barrel;
 
     private float myRandTimer;
-    private int animState = 0; // 0 = not presented, 1 = ready to fire
-    private bool isAnimating = false;
+    public int animState = 0; // 0 = not presented, 1 = ready to fire
+    [HideInInspector]public bool isAnimating = false;
     private float hasReloadedTime = 0f;
 
     private O_FactionControl brain;
@@ -26,7 +26,7 @@ public class O_TroopControl : MonoBehaviour
         myRandTimer = Random.Range(0.0f, 0.3f);
     }
 
-    void Update()
+    void FixedUpdate()
     {
         //make sure boots are on ground        
         Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y + 5, transform.position.z), Vector3.down);
@@ -34,8 +34,8 @@ public class O_TroopControl : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, 10))
         {
-            Debug.DrawLine(new Vector3(transform.position.x, transform.position.y + 5, transform.position.z), hit.point, Color.red); // Visual debug
-            Debug.Log("Hit: " + hit.collider.name + " at distance: " + hit.distance);
+            //Debug.DrawLine(new Vector3(transform.position.x, transform.position.y + 5, transform.position.z), hit.point, Color.red); // Visual debug
+            //Debug.Log("Hit: " + hit.collider.name + " at distance: " + hit.distance);
             bootHeight = hit.point.y;
             transform.position = new Vector3(transform.position.x, bootHeight, transform.position.z);
         }
@@ -45,11 +45,9 @@ public class O_TroopControl : MonoBehaviour
             Debug.Log("No ground hit detected.");
         }        
 
-        if (isAnimating) return;
-
-        if (Input.GetKeyDown(doAnimKey))
+        /*if (Input.GetKeyDown(doAnimKey))
         {
-            if (!brain.troops.Contains(gameObject.GetComponent<O_TroopControl>()))
+            if (!brain.troopsInFaction.Contains(gameObject.GetComponent<O_TroopControl>()))
             {
                 return;
             }
@@ -66,38 +64,36 @@ public class O_TroopControl : MonoBehaviour
                 float fireDelay = Random.Range(0f, 0.3f);
                 StartCoroutine(DelayedFire(fireDelay));
             }
-        }
+        }*/
     }
 
     public void PreparePresentOrFire()
     {
-        if (!brain.troops.Contains(gameObject.GetComponent<O_TroopControl>()))
+        /*if (!brain.troopsInFaction.Contains(gameObject.GetComponent<O_TroopControl>()))
         {
             return;
-        }
+        }*/
         if (animState == 0)
         {
             // FIRST PRESS: Random delay before presenting arms
             isAnimating = true;
             float delay = Random.Range(0f, 0.3f);
-            StartCoroutine(DelayedPresent(delay));
+            Invoke("DelayedPresent", delay);
         }
         else if (animState == 1 && Time.time >= hasReloadedTime)
         {
             isAnimating = true;
             float fireDelay = Random.Range(0f, 0.3f);
-            StartCoroutine(DelayedFire(fireDelay));
+            Invoke("DelayedFire", fireDelay);
         }
     }
 
     // Coroutine for delayed "Present Arms" with random delay
-    IEnumerator DelayedPresent(float delay)
+    public void DelayedPresent()
     {
-        yield return new WaitForSeconds(delay);
-
         if (a == null)
         {
-            yield break;
+            return;
         }
         a.Play("Troop_Present");
         StartCoroutine(WaitForAnimation("Troop_Present", () =>
@@ -106,13 +102,11 @@ public class O_TroopControl : MonoBehaviour
             isAnimating = false;
         }));
     }
-    IEnumerator DelayedFire(float delay)
+    public void DelayedFire()
     {
-        yield return new WaitForSeconds(delay);
-
         if (a == null)
         {
-            yield break;
+            return;
         }
         a.Play("Troop_FirenLoad");
         Instantiate(shootParticle, barrel.position, barrel.rotation);
@@ -135,6 +129,6 @@ public class O_TroopControl : MonoBehaviour
         float animLength = a.GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(animLength);
 
-        onComplete?.Invoke();
+        onComplete?.Invoke(); //isAnimating = false;, I guess?
     }
 }
