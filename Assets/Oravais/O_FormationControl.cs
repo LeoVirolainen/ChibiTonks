@@ -22,8 +22,6 @@ public class O_FormationControl : MonoBehaviour
 
     private Coroutine moveCoroutine;
     private bool isMoving = false;
-
-    public bool hasFired = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,6 +31,11 @@ public class O_FormationControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (troopsInFormation.Count == 0)
+        {
+            Debug.Log($"{gameObject.name} has no troops left. Formation inactive.");
+            return;
+        }
         //get forward vector in world space
         viewDir = transform.TransformDirection(Vector3.forward);
         //get vector pointing to target
@@ -48,37 +51,45 @@ public class O_FormationControl : MonoBehaviour
         {
             WalkToGoal();
         }
-        if (isMoving == false)
+
+        if (activeEnemy != null)
         {
-            if (activeEnemy != null)
+            var targetRotation = Quaternion.LookRotation(new Vector3(activeEnemy.position.x, transform.position.y, activeEnemy.position.z) - transform.position);
+            // Smoothly rotate towards the target point
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1 * Time.deltaTime);
+
+            //IF WE ARE FACING (CLOSE NOUGH) TARGET:                                              
+            var dot = Vector3.Dot(viewDir, toOther);
+
+            //if (gameObject.name == "1. Hälsingen Pataljoona")
+            //print(gameObject.name + "'s DOT: " + dot);
+
+            // find out if enough troops have reloaded to fire again
+            int amtOfReadyTroops = 0;
+            foreach (O_TroopControl t in troopsInFormation)
             {
-                var targetRotation = Quaternion.LookRotation(new Vector3(activeEnemy.position.x, transform.position.y, activeEnemy.position.z) - transform.position);
-                // Smoothly rotate towards the target point
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1 * Time.deltaTime);
-
-                //IF WE ARE FACING (CLOSE NOUGH) TARGET:                                              
-                var dot = Vector3.Dot(viewDir, toOther);
-
-                //if (gameObject.name == "1. Hälsingen Pataljoona")
-                    //print(gameObject.name + "'s DOT: " + dot);
-
-                if (dot > 0.95f && !hasFired)
+                if (t.isAnimating == false)
                 {
-                    hasFired = true;
-                    StartCoroutine(FireVolley());
+                    amtOfReadyTroops++;
                 }
             }
-            else
+            if (dot > 0.95f && amtOfReadyTroops > 0) //fire as soon as someone has reloaded
             {
-                if (previousEnemy != null)
-                {
-                    var targetRotation = Quaternion.LookRotation(new Vector3(previousEnemy.position.x, transform.position.y, previousEnemy.position.z) - transform.position);
-                    // Smoothly rotate towards the target point
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1 * Time.deltaTime);
-                }
+                FireVolley();
+                print(gameObject.name + " Fire!");
+            }
+        }
+        else
+        {
+            if (previousEnemy != null)
+            {
+                var targetRotation = Quaternion.LookRotation(new Vector3(previousEnemy.position.x, transform.position.y, previousEnemy.position.z) - transform.position);
+                // Smoothly rotate towards the target point
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1 * Time.deltaTime);
             }
         }
     }
+
 
     public void WalkToGoal()
     {
@@ -90,33 +101,15 @@ public class O_FormationControl : MonoBehaviour
         isMoving = true;
         moveCoroutine = StartCoroutine(LerpWithCurve());
     }
-    public IEnumerator FireVolley()
+    public void FireVolley()
     {
         foreach (O_TroopControl t in troopsInFormation)
         {
-            if (!t.isAnimating)
+            if (!t.isAnimating && Time.time >= t.hasReloadedTime)
             {
                 t.PreparePresentOrFire();
             }
-        }        
-        //check if active enemy is null, if so, STOP IMMEDIATELY.
-        if (activeEnemy == null) yield return null;
-        if (!activeEnemy.gameObject.activeInHierarchy) yield return null;
-        var enemyFormation = activeEnemy.GetComponent<O_FormationControl>();
-        if (enemyFormation != null)
-        {
-            //enemyFormation.TakeCasualties(troopsInFormation.Count);
         }
-
-        if (troopsInFormation[0].animState == 0)
-        {
-            yield return new WaitForSeconds(1.1f); //wait for presenting arms
-        }
-        else
-        {
-            yield return new WaitForSeconds(6); //wait for reload
-        }
-        hasFired = false;
     }
     public void TakeCasualties(int attackerStrength)
     {
@@ -140,7 +133,7 @@ public class O_FormationControl : MonoBehaviour
             }
 
             foreach (O_TroopControl troop in theDying)
-            {                
+            {
                 troopsInFormation.Remove(troop);
 
                 float delay = Random.Range(0.01f, 0.1f); // stagger time

@@ -76,6 +76,9 @@ MonoBehaviour:
   shootParticle: {fileID: 5829793649800860905, guid: 5bfd311cf10f24e418ff5b67ad851640,
     type: 3}
   barrel: {fileID: 4135626155302490817}
+  animState: 0
+  isAnimating: 0
+  bootHeight: 0
 --- !u!1 &946230905287870991
 GameObject:
   m_ObjectHideFlags: 0

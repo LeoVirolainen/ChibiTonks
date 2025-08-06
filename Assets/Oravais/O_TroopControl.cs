@@ -9,21 +9,21 @@ public class O_TroopControl : MonoBehaviour
     public GameObject shootParticle;
     public Transform barrel;
 
-    private float myRandTimer;
     public int animState = 0; // 0 = not presented, 1 = ready to fire
-    [HideInInspector]public bool isAnimating = false;
-    private float hasReloadedTime = 0f;
+    public bool isAnimating = false;
 
     private O_FactionControl brain;
 
     [SerializeField] private float bootHeight;
+
+    public float hasReloadedTime = 0f;
+
 
     void Start()
     {
         if (GetComponent<Animator>() != null)
             a = GetComponent<Animator>();
         brain = GetComponentInParent<O_FactionControl>();
-        myRandTimer = Random.Range(0.0f, 0.3f);
     }
 
     void FixedUpdate()
@@ -69,10 +69,10 @@ public class O_TroopControl : MonoBehaviour
 
     public void PreparePresentOrFire()
     {
-        /*if (!brain.troopsInFaction.Contains(gameObject.GetComponent<O_TroopControl>()))
+        if (!brain.troopsInFaction.Contains(gameObject.GetComponent<O_TroopControl>()))
         {
             return;
-        }*/
+        }
         if (animState == 0)
         {
             // FIRST PRESS: Random delay before presenting arms
@@ -93,9 +93,12 @@ public class O_TroopControl : MonoBehaviour
     {
         if (a == null)
         {
+            isAnimating = false;
             return;
         }
         a.Play("Troop_Present");
+
+        //wait for animation to finish
         StartCoroutine(WaitForAnimation("Troop_Present", () =>
         {
             animState = 1;
@@ -106,15 +109,55 @@ public class O_TroopControl : MonoBehaviour
     {
         if (a == null)
         {
+            isAnimating = false;
             return;
         }
         a.Play("Troop_FirenLoad");
         Instantiate(shootParticle, barrel.position, barrel.rotation);
-        hasReloadedTime = Time.time + 6f + Random.Range(0f, 0.3f); // new reload delay
 
+        O_FormationControl myFormation = GetComponentInParent<O_FormationControl>();
+        if (myFormation == null || myFormation.activeEnemy == null)
+            return;
+
+        O_FormationControl enemyFormation = myFormation.activeEnemy.GetComponent<O_FormationControl>();
+        if (enemyFormation == null || enemyFormation.troopsInFormation == null || enemyFormation.troopsInFormation.Count <= 0)
+            return;
+
+        // Pick a random troop safely
+        O_TroopControl myTarget = null;
+        int attempts = 0;
+        while (myTarget == null && attempts < 10)
+        {
+            int index = Random.Range(0, enemyFormation.troopsInFormation.Count);
+            if (index >= 0 && index < enemyFormation.troopsInFormation.Count)
+            {
+                myTarget = enemyFormation.troopsInFormation[index];
+            }
+            attempts++;
+        }
+
+        if (myTarget != null)
+        {
+            float distance = Vector3.Distance(transform.position, myTarget.transform.position);
+            float accuracyChance = Mathf.Clamp(100 - distance * 5f, 5f, 95f); // Tunable
+            float myRoll = Random.Range(0f, 100f);
+
+            if (myRoll < accuracyChance)
+            {
+                bool removed = enemyFormation.troopsInFormation.Remove(myTarget);
+                if (removed)
+                {
+                    float delay = Random.Range(0.01f, 0.1f);
+                    int animId = Random.Range(0, 2);
+                    StartCoroutine(WaitAndAnimate(myTarget, delay, animId));
+                }
+            }
+        }
+        //wait for animation to finish
         StartCoroutine(WaitForAnimation("Troop_FirenLoad", () =>
         {
             isAnimating = false;
+            hasReloadedTime = Time.time + 0.1f + Random.Range(0f, 0.3f); // adjustable
         }));
     }
 
@@ -129,6 +172,19 @@ public class O_TroopControl : MonoBehaviour
         float animLength = a.GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(animLength);
 
-        onComplete?.Invoke(); //isAnimating = false;, I guess?
+        onComplete?.Invoke(); //isAnimating = false;
+    }
+
+    public static IEnumerator WaitAndAnimate(O_TroopControl t, float time, int animId)
+    {
+        yield return new WaitForSeconds(time);
+        if (t != null && t.a != null)
+        {
+            if (animId == 0)
+                t.a.Play("Troop_Die");
+            else
+                t.a.Play("Troop_Die1");
+            t.transform.SetParent(null);
+        }
     }
 }
