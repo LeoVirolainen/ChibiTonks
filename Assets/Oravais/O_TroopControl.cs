@@ -18,7 +18,7 @@ public class O_TroopControl : MonoBehaviour
 
     public float hasReloadedTime = 0f;
 
-
+    public bool isDead = false;
     void Start()
     {
         if (GetComponent<Animator>() != null)
@@ -69,18 +69,17 @@ public class O_TroopControl : MonoBehaviour
 
     public void PreparePresentOrFire()
     {
-        if (!brain.troopsInFaction.Contains(gameObject.GetComponent<O_TroopControl>()))
+        if (!brain.troopsInFaction.Contains(gameObject.GetComponent<O_TroopControl>())) //prevent dead troops from firing
         {
             return;
         }
-        if (animState == 0)
+        if (animState == 0) //present arms! Do animation and wait for it to finish
         {
-            // FIRST PRESS: Random delay before presenting arms
             isAnimating = true;
             float delay = Random.Range(0f, 0.3f);
             Invoke("DelayedPresent", delay);
         }
-        else if (animState == 1 && Time.time >= hasReloadedTime)
+        else if (animState == 1 && Time.time >= hasReloadedTime) //FIRE! if we have reloaded
         {
             isAnimating = true;
             float fireDelay = Random.Range(0f, 0.3f);
@@ -88,10 +87,10 @@ public class O_TroopControl : MonoBehaviour
         }
     }
 
-    // Coroutine for delayed "Present Arms" with random delay
+    // function for delayed "Present Arms" with random delay
     public void DelayedPresent()
     {
-        if (a == null)
+        if (a == null) //stop doing anything if there is no animator
         {
             isAnimating = false;
             return;
@@ -101,12 +100,15 @@ public class O_TroopControl : MonoBehaviour
         //wait for animation to finish
         StartCoroutine(WaitForAnimation("Troop_Present", () =>
         {
-            animState = 1;
+            animState = 1; //set animState to 1 so we know we're firing next
             isAnimating = false;
         }));
     }
+    // function for delayed "FIRE" with random delay
     public void DelayedFire()
     {
+        bool fireDuds; //use this to fire non-lethal rounds if enemy formation is too weak (prevent conflicts and bugs)
+
         if (a == null)
         {
             isAnimating = false;
@@ -120,36 +122,38 @@ public class O_TroopControl : MonoBehaviour
             return;
 
         O_FormationControl enemyFormation = myFormation.activeEnemy.GetComponent<O_FormationControl>();
-        if (enemyFormation == null || enemyFormation.troopsInFormation == null || enemyFormation.troopsInFormation.Count <= 0)
-            return;
+        if (enemyFormation == null) //if active enemy has no formation control component
+            fireDuds = true;
 
-        // Pick a random troop safely
-        O_TroopControl myTarget = null;
-        int attempts = 0;
-        while (myTarget == null && attempts < 10)
+        // Get a list of LIVING troops
+        List<O_TroopControl> validTargets = enemyFormation.troopsInFormation.FindAll(t => t != null && !t.isDead);
+        if (validTargets.Count == 0) //if there are no valid troops in enemy formation
         {
-            int index = Random.Range(0, enemyFormation.troopsInFormation.Count);
-            if (index >= 0 && index < enemyFormation.troopsInFormation.Count)
-            {
-                myTarget = enemyFormation.troopsInFormation[index];
-            }
-            attempts++;
+            fireDuds = true;
         }
-
-        if (myTarget != null)
+        else if (enemyFormation.killAllowance > 0)//if there are troops in validTargets and we have kills left in our allowance
         {
-            float distance = Vector3.Distance(transform.position, myTarget.transform.position);
-            float accuracyChance = Mathf.Clamp(100 - distance * 5f, 5f, 95f); // Tunable
-            float myRoll = Random.Range(0f, 100f);
+            // Pick a random living target
+            O_TroopControl myTarget = validTargets[Random.Range(0, validTargets.Count)];
 
-            if (myRoll < accuracyChance)
+            if (myTarget != null)
             {
-                bool removed = enemyFormation.troopsInFormation.Remove(myTarget);
-                if (removed)
-                {
-                    float delay = Random.Range(0.01f, 0.1f);
-                    int animId = Random.Range(0, 2);
-                    StartCoroutine(WaitAndAnimate(myTarget, delay, animId));
+                enemyFormation.killAllowance--;
+
+                //float distance = Vector3.Distance(transform.position, myTarget.transform.position);
+                float accuracyChance = Mathf.Clamp(100 - (enemyFormation.troopsInFormation.Count * 0.5f), 5f, 95f); // Tunable
+                float myRoll = Random.Range(0f, 100f);
+
+                if (myRoll > accuracyChance)
+                {                    
+                    if (enemyFormation.troopsInFormation.Count > 5) //do not kill formations below 5 troops
+                    {
+                        float delay = Random.Range(0.01f, 0.1f);
+                        int animId = Random.Range(0, 2);
+                        //kill the enemy troop
+                        enemyFormation.troopsInFormation.Remove(myTarget);
+                        StartCoroutine(WaitAndKill(myTarget, delay, animId));
+                    }
                 }
             }
         }
@@ -175,16 +179,19 @@ public class O_TroopControl : MonoBehaviour
         onComplete?.Invoke(); //isAnimating = false;
     }
 
-    public static IEnumerator WaitAndAnimate(O_TroopControl t, float time, int animId)
+    public static IEnumerator WaitAndKill(O_TroopControl t, float time, int animId)
     {
         yield return new WaitForSeconds(time);
         if (t != null && t.a != null)
         {
+            t.isDead = true;
             if (animId == 0)
                 t.a.Play("Troop_Die");
             else
                 t.a.Play("Troop_Die1");
+
             t.transform.SetParent(null);
+            //yield return new WaitForSeconds(t.a.GetCurrentAnimatorStateInfo(0).length);            
         }
     }
 }

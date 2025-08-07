@@ -20,17 +20,27 @@ public class O_FormationControl : MonoBehaviour
     Vector3 viewDir;
     Vector3 toOther;
 
+    public int killAllowance;
+    float resetAllowanceTime;
+
     private Coroutine moveCoroutine;
     private bool isMoving = false;
     // Start is called before the first frame update
     void Start()
     {
         troopsInFormation = new List<O_TroopControl>(GetComponentsInChildren<O_TroopControl>());
+        resetAllowanceTime = Time.time + 6;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Time.time >= resetAllowanceTime)
+        {
+            killAllowance = 3;
+            resetAllowanceTime = Time.time + 6;
+        }
+
         if (troopsInFormation.Count == 0)
         {
             Debug.Log($"{gameObject.name} has no troops left. Formation inactive.");
@@ -109,50 +119,6 @@ public class O_FormationControl : MonoBehaviour
             {
                 t.PreparePresentOrFire();
             }
-        }
-    }
-    public void TakeCasualties(int attackerStrength)
-    {
-        if (troopsInFormation.Count > 0)
-        {
-            int numberToKill = Random.Range(1, Mathf.Min(6, attackerStrength)); // Between 1 and 6 or enemy troop count, whichever is lower
-
-            List<O_TroopControl> theDying = new List<O_TroopControl>();
-
-            // Get distinct random indexes
-            HashSet<int> chosenIndexes = new HashSet<int>();
-            while (chosenIndexes.Count < numberToKill)
-            {
-                chosenIndexes.Add(Random.Range(0, troopsInFormation.Count));
-            }
-
-            // add each troop of corresponding index to new list of killable troops
-            foreach (int index in chosenIndexes)
-            {
-                theDying.Add(troopsInFormation[index]);
-            }
-
-            foreach (O_TroopControl troop in theDying)
-            {
-                troopsInFormation.Remove(troop);
-
-                float delay = Random.Range(0.01f, 0.1f); // stagger time
-                int animId = Random.Range(0, 2); // dying animation v.0 or v.1
-                StartCoroutine(WaitAndAnimate(troop, delay, animId));
-            }
-        }
-    }
-    //helper function for triggering and delaying troop death
-    public static IEnumerator WaitAndAnimate(O_TroopControl t, float time, int animId)
-    {
-        yield return new WaitForSeconds(time);
-        if (t != null && t.a != null)
-        {
-            if (animId == 0)
-                t.a.Play("Troop_Die");
-            else
-                t.a.Play("Troop_Die1");
-            t.transform.SetParent(null);
         }
     }
     private IEnumerator LerpWithCurve()
