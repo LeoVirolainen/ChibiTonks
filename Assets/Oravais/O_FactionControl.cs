@@ -6,9 +6,12 @@ public class O_FactionControl : MonoBehaviour
 {
     public List<O_TroopControl> troopsInFaction;
     public List<O_FormationControl> formations;
+
+    public O_PlayheadHandler playhead;
     //public KeyCode killKey;
 
     public int currentPhase;
+    public int maxPhase = 6;
     //0(A), 1(B), 2(B I), 3(C), 4(C I), 5(D), 6(D I)
 
     void Start()
@@ -18,11 +21,13 @@ public class O_FactionControl : MonoBehaviour
     }
     public void NextPhase()
     {
-        if (currentPhase < 6)
+        if (currentPhase < maxPhase)
         {
             currentPhase++;
             DoFormationMovements();
             SetActiveEnemies();
+            if(playhead != null)
+                playhead.MovePlayhead();
         }
         else
         {
@@ -36,6 +41,8 @@ public class O_FactionControl : MonoBehaviour
             currentPhase--;
             DoFormationMovements();
             SetActiveEnemies();
+            if (playhead != null)
+                playhead.MovePlayhead();
         }
         else
         {
