@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class O_FactionControl : MonoBehaviour
 {
     public List<O_TroopControl> troopsInFaction;
     public List<O_FormationControl> formations;
+    public O_TextHandler textCode;
 
     public O_PlayheadHandler playhead;
     //public KeyCode killKey;
@@ -18,16 +20,16 @@ public class O_FactionControl : MonoBehaviour
     {
         troopsInFaction = new List<O_TroopControl>(GetComponentsInChildren<O_TroopControl>());
         formations = new List<O_FormationControl>(GetComponentsInChildren<O_FormationControl>());
+        textCode = GetComponent<O_TextHandler>();
+        if (textCode != null)
+            textCode.OnPhaseChanged(currentPhase);
     }
     public void NextPhase()
     {
         if (currentPhase < maxPhase)
         {
             currentPhase++;
-            DoFormationMovements();
-            SetActiveEnemies();
-            if(playhead != null)
-                playhead.MovePlayhead();
+            ChangePhase();
         }
         else
         {
@@ -39,15 +41,23 @@ public class O_FactionControl : MonoBehaviour
         if (currentPhase > 0)
         {
             currentPhase--;
-            DoFormationMovements();
-            SetActiveEnemies();
-            if (playhead != null)
-                playhead.MovePlayhead();
+            ChangePhase();
         }
         else
         {
             print("Can't rewind further!");
         }
+    }
+    void ChangePhase()
+    {
+        DoFormationMovements();
+        SetActiveEnemies();
+        if (playhead != null)
+            playhead.MovePlayhead();
+        if (textCode != null)
+        {
+            playhead.GetComponentInChildren<TextMeshProUGUI>().text = textCode.OnPhaseChanged(currentPhase);
+        }            
     }
     public void DoFormationMovements()
     {
