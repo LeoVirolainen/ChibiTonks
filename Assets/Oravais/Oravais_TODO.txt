@@ -1,11 +1,18 @@
 TO DO:
 
 - automated troop dying when fired upon: DONE!
-- phase playhead: DONE! (could do with some tweening)
-  - Also: name each phase and display name near playhead
+
+- phase playhead: DONE! 
+	- (could do with some tweening): DONE!
+	- Also: name each phase and display name near playhead
+
 - sound effects (mix together variants of different size volleys to be triggered when a lot of troops fire)
+
 - main combat phase
-  - track movements and targeted formations
+	- track movements and targeted formations
+
 - fine tune troop positions (esp. swedes south of lillträsk)
+
 - put name labels on troops
+
 - info text for each phase: where? side?

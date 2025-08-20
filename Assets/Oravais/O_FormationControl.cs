@@ -5,6 +5,9 @@ using static UnityEngine.GraphicsBuffer;
 
 public class O_FormationControl : MonoBehaviour
 {
+    public AudioClip fireS;
+    public AudioClip fireL;
+
     public AnimationCurve moveCurve;
     public KeyCode moveKey;
 
@@ -113,13 +116,26 @@ public class O_FormationControl : MonoBehaviour
     }
     public void FireVolley()
     {
+        int howManyTroopsFiring = 0;
         foreach (O_TroopControl t in troopsInFormation)
         {
             if (!t.isAnimating && Time.time >= t.hasReloadedTime)
-            {
+            {              
                 t.PreparePresentOrFire();
+                howManyTroopsFiring++;
+                //some check for if this is the last troop to fire, play sounds
             }
         }
+        /*if (howManyTroopsFiring > 10)
+        {
+            //play big volley sound
+            GameObject.Find("TempAudioSource").GetComponent<AudioSource>().PlayOneShot(fireL);
+        }
+        else if (howManyTroopsFiring > 0)
+        {
+            //play smol volley sound
+            GameObject.Find("TempAudioSource").GetComponent<AudioSource>().PlayOneShot(fireS);
+        }*/
     }
     private IEnumerator LerpWithCurve()
     {
