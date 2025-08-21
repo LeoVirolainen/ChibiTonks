@@ -1,12 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Progress;
 using static UnityEngine.GraphicsBuffer;
 
 public class O_FormationControl : MonoBehaviour
 {
-    public AudioClip fireS;
-    public AudioClip fireL;
 
     public AnimationCurve moveCurve;
     public KeyCode moveKey;
@@ -28,6 +28,8 @@ public class O_FormationControl : MonoBehaviour
 
     private Coroutine moveCoroutine;
     private bool isMoving = false;
+
+    bool hasFired = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -89,7 +91,7 @@ public class O_FormationControl : MonoBehaviour
             if (dot > 0.95f && amtOfReadyTroops > 0) //fire as soon as someone has reloaded
             {
                 FireVolley();
-                print(gameObject.name + " Fire!");
+                //print(gameObject.name + " Fire!");
             }
         }
         else
@@ -116,26 +118,37 @@ public class O_FormationControl : MonoBehaviour
     }
     public void FireVolley()
     {
-        int howManyTroopsFiring = 0;
-        foreach (O_TroopControl t in troopsInFormation)
+        if (hasFired == false)
         {
-            if (!t.isAnimating && Time.time >= t.hasReloadedTime)
-            {              
-                t.PreparePresentOrFire();
-                howManyTroopsFiring++;
-                //some check for if this is the last troop to fire, play sounds
+            List<O_TroopControl> firingTroops = new List<O_TroopControl>();
+            foreach (O_TroopControl t in troopsInFormation)
+            {
+                if (!t.isAnimating && Time.time >= t.hasReloadedTime)
+                {
+                    t.PreparePresentOrFire(); //make this trooper shoot
+                    firingTroops.Add(t); //keep count of how many troops are firing
+                }
             }
+            foreach (O_TroopControl shooter in firingTroops)
+            {
+                if (shooter.Equals(firingTroops[firingTroops.Count - 1])) //if this troop is the last one in the list
+                {
+                    //this is the last troop to fire! Play the sound.
+                    if (firingTroops.Count > 10)
+                    {
+                        //play big volley sound
+                        AudioHandler.Instance.PlayRandomSound("O_Volley0", "O_Volley1", "O_Volley2", null, true, true, transform.position, 1);
+                    }
+                    else if (firingTroops.Count > 0)
+                    {
+                        //play smol volley sound
+                        AudioHandler.Instance.PlayRandomSound("O_Openfire0", "O_Openfire1", "O_Openfire2", "O_Openfire3", true, true, transform.position, 1);
+                    }
+                }
+            }
+            hasFired = true;
+            StartCoroutine(WaitForFiring());
         }
-        /*if (howManyTroopsFiring > 10)
-        {
-            //play big volley sound
-            GameObject.Find("TempAudioSource").GetComponent<AudioSource>().PlayOneShot(fireL);
-        }
-        else if (howManyTroopsFiring > 0)
-        {
-            //play smol volley sound
-            GameObject.Find("TempAudioSource").GetComponent<AudioSource>().PlayOneShot(fireS);
-        }*/
     }
     private IEnumerator LerpWithCurve()
     {
@@ -157,5 +170,11 @@ public class O_FormationControl : MonoBehaviour
         }
         isMoving = false;
         transform.position = goalPos; // Snap just to be safe
+    }
+    private IEnumerator WaitForFiring()
+    {
+        float time = UnityEngine.Random.Range(0.4f, 1.2f);
+        yield return new WaitForSeconds(time);
+        hasFired = false;
     }
 }
