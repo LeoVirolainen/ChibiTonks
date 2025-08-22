@@ -141,7 +141,7 @@ public class O_TroopControl : MonoBehaviour
                 enemyFormation.killAllowance--;
 
                 //float distance = Vector3.Distance(transform.position, myTarget.transform.position);
-                float accuracyChance = Mathf.Clamp(100 - (enemyFormation.troopsInFormation.Count * 0.5f), 5f, 95f); // Tunable
+                float accuracyChance = Mathf.Clamp(100 - (enemyFormation.troopsInFormation.Count * 0.4f), 5f, 95f); // Tunable
                 float myRoll = Random.Range(0f, 100f);
 
                 if (myRoll > accuracyChance)
@@ -186,10 +186,15 @@ public class O_TroopControl : MonoBehaviour
         {
             t.isDead = true;
             if (animId == 0)
+            {
                 t.a.Play("Troop_Die");
+                AudioHandler.Instance.PlayRandomSound("O_Scream0", "O_Scream1", "O_Scream2", null, true, true, t.transform.position, .8f, 0.3f);
+            }
             else
+            {
                 t.a.Play("Troop_Die1");
-
+                AudioHandler.Instance.PlayRandomSound("O_Scream3", "O_Scream4", "O_Scream5", "O_Scream6", true, true, t.transform.position, .8f, 0.45f);
+            }
             t.transform.SetParent(null);
             //yield return new WaitForSeconds(t.a.GetCurrentAnimatorStateInfo(0).length);            
         }

@@ -7,7 +7,7 @@ using static UnityEngine.GraphicsBuffer;
 
 public class O_FormationControl : MonoBehaviour
 {
-
+    public bool isCannon;
     public AnimationCurve moveCurve;
     public KeyCode moveKey;
 
@@ -134,15 +134,19 @@ public class O_FormationControl : MonoBehaviour
                 if (shooter.Equals(firingTroops[firingTroops.Count - 1])) //if this troop is the last one in the list
                 {
                     //this is the last troop to fire! Play the sound.
-                    if (firingTroops.Count > 10)
+                    if (isCannon)
+                    {
+                        AudioHandler.Instance.PlayRandomSound("O_Cannon0", "O_Cannon1", "O_Cannon2", null, true, true, transform.position, .8f, 1.5f);
+                    }
+                    else if (firingTroops.Count > 10)
                     {
                         //play big volley sound
-                        AudioHandler.Instance.PlayRandomSound("O_Volley0", "O_Volley1", "O_Volley2", null, true, true, transform.position, 1);
+                        AudioHandler.Instance.PlayRandomSound("O_Volley0", "O_Volley1", "O_Volley2", null, true, true, transform.position, .8f, 1f);
                     }
                     else if (firingTroops.Count > 0)
                     {
                         //play smol volley sound
-                        AudioHandler.Instance.PlayRandomSound("O_Openfire0", "O_Openfire1", "O_Openfire2", "O_Openfire3", true, true, transform.position, 1);
+                        AudioHandler.Instance.PlayRandomSound("O_Openfire0", "O_Openfire1", "O_Openfire2", "O_Openfire3", true, true, transform.position, .8f, 1);
                     }
                 }
             }

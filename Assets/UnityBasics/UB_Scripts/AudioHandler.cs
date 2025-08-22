@@ -61,7 +61,7 @@ public class AudioHandler : MonoBehaviour
         aud.PlayOneShot(s);
         Destroy(newSource, s.length + 0.1f);
     }
-    public void PlayRandomSound(string sound0, string sound1, string sound2 = null, string sound3 = null, bool doRandomPitch = true, bool do3D = false, Vector3 position = default, float vol = 1)
+    public void PlayRandomSound(string sound0, string sound1, string sound2 = null, string sound3 = null, bool doRandomPitch = true, bool do3D = false, Vector3 position = default, float spatialBlend = 0, float vol = 1)
     {
         AudioClip s = null;
         GameObject newSource;
@@ -69,7 +69,7 @@ public class AudioHandler : MonoBehaviour
         if (do3D == true)
         {
             newSource = Instantiate(audioPref, position, Quaternion.identity);
-            newSource.GetComponent<AudioSource>().spatialBlend = 0.5f;
+            newSource.GetComponent<AudioSource>().spatialBlend = spatialBlend;
         }
         else
         {
