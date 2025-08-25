@@ -36,8 +36,11 @@ public class O_TroopControl : MonoBehaviour
         {
             //Debug.DrawLine(new Vector3(transform.position.x, transform.position.y + 5, transform.position.z), hit.point, Color.red); // Visual debug
             //Debug.Log("Hit: " + hit.collider.name + " at distance: " + hit.distance);
-            bootHeight = hit.point.y;
-            transform.position = new Vector3(transform.position.x, bootHeight, transform.position.z);
+            if (!hit.collider.gameObject.CompareTag("Target"))
+            {
+                bootHeight = hit.point.y;
+                transform.position = new Vector3(transform.position.x, bootHeight, transform.position.z);
+            }
         }
         else
         {

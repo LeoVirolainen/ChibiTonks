@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using static UnityEditor.Progress;
 using static UnityEngine.GraphicsBuffer;
 
 public class O_FormationControl : MonoBehaviour
 {
     public bool isCannon;
+    public bool showNameOnMouseOver;
     public AnimationCurve moveCurve;
     public KeyCode moveKey;
 
@@ -30,13 +32,24 @@ public class O_FormationControl : MonoBehaviour
     private bool isMoving = false;
 
     bool hasFired = false;
+
+    TextMeshProUGUI label;
     // Start is called before the first frame update
     void Start()
     {
         troopsInFormation = new List<O_TroopControl>(GetComponentsInChildren<O_TroopControl>());
         resetAllowanceTime = Time.time + 6;
+        label = GetComponentInChildren<TextMeshProUGUI>();
+        label.gameObject.SetActive(false);
     }
-
+    private void OnMouseOver()
+    {
+        label.gameObject.SetActive(true);
+    }
+    private void OnMouseExit()
+    {
+        label.gameObject.SetActive(false);
+    }
     // Update is called once per frame
     void Update()
     {
