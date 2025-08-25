@@ -1,8 +1,8 @@
 TO DO:
 
-- automated troop dying when fired upon: DONE!
+X automated troop dying when fired upon: DONE!
 
-- phase playhead: DONE! 
+X phase playhead: DONE! 
 	- (could do with some tweening): DONE!
 	- Also: name each phase and display name near playhead
 
@@ -13,6 +13,8 @@ TO DO:
 
 - fine tune troop positions (esp. swedes south of lillträsk)
 
-- put name labels on troops
+- Construct proper map!
 
-- info text for each phase: where? side?
+X put name labels on troops: DONE!
+
+X info text for each phase: where? side?: DONE!
